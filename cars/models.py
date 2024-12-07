@@ -22,6 +22,9 @@ class Car(TimestampMixin, models.Model):
     fuel = models.IntegerField(
         verbose_name='Расход топлива',
     )
+    flight = models.IntegerField(
+        verbose_name='Рейсы',
+    )
     weight = models.IntegerField(
         verbose_name='Вес машины',
     )

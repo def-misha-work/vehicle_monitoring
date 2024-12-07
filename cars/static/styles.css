@@ -433,9 +433,6 @@ body {
   border-radius: 6px;
   margin-right: 6px;
 }
-.icon-svg {
-  filter: brightness(0) saturate(100%) invert(1);
-}
 @media screen and (max-width: 780px) {
   .tableView .product-cell {
     font-size: 12px;
@@ -606,4 +603,50 @@ body {
 }
 .gridView .cell-label {
   opacity: 0.6;
+}
+
+
+/* мои стили */
+.icon-svg {
+  filter: brightness(0) saturate(100%) invert(1);
+}
+.pagination {
+  font-size: 14px;
+  text-align: center;
+  margin-top: 10px;
+  color: white;
+}
+.pagination a {
+  color: white;
+}
+
+/* radial_cart */
+.icon {
+  font-family: fontawesome;
+  font-weight: bold;
+  font-size: 30px;
+}
+.goal, .completed {
+  font-family: 'Roboto', 'Myriad Set Pro', 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, Verdana, sans-serif;
+  fill: white;
+  text-anchor: middle;
+}
+.goal {
+  font-size: 30px;
+}
+.completed {
+  font-size: 95px;
+}
+.one, .two, .three {
+  display: none;
+}
+.chart {
+  width: 100px; /* Измените ширину контейнера */
+  height: 100px; /* Измените высоту контейнера */
+  overflow: hidden; /* Скрыть переполнение, если оно есть */
+}
+
+.chart svg {
+  width: 100%; /* Задать ширину SVG в 100% от контейнера */
+  height: 100%; /* Задать высоту SVG в 100% от контейнера */
 }

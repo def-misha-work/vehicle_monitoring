@@ -1,0 +1,35 @@
+﻿{% for car in page_obj %}    
+<div class="products-row">
+  <div class="product-cell"><span>{{ car.car_number }}</span></div>
+  <div class="product-cell">
+    <div class="chart">
+      <div class="one">80</div>
+      <div class="two">70</div>
+      <div class="three">50</div>
+  </div>
+  </div>
+  <div class="product-cell"><span>{{ car.mileage }} км.</span></div>
+  <div class="product-cell"><span>{{ car.fuel }} литров</span></div>
+  <div class="product-cell"><span>{{ car.flight }} рейсов</span></div>
+  <div class="product-cell"><span>{{ car.weight }} тонн</span></div>
+  <div class="product-cell"><span>{{ car.shift_day }} г/т/км</span></div>
+</div>
+{% endfor %}
+
+<div class="pagination">
+  <span class="step-links">
+      {% if page_obj.has_previous %}
+          <a href="?page=1">&laquo; Первая</a>
+          <a href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+      {% endif %}
+
+      <span class="current">
+          Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+      </span>
+
+      {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}">Следующая</a>
+          <a href="?page={{ page_obj.paginator.num_pages }}">Последняя &raquo;</a>
+      {% endif %}
+  </span>
+</div>

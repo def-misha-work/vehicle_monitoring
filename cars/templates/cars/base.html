@@ -1,0 +1,20 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="ru" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - Products Dashboard UI</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+
+</head>
+<body>
+  {% block content %}
+  {% endblock %}
+  <script src="https://cdn.rawgit.com/bm-w/d3/master/d3.js"></script>
+  <script  src="{% static 'scripts.js' %}"></script>
+  <script  src="{% static 'radial_cart.js' %}"></script>
+</body>
+</html>
