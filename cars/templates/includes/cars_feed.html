@@ -1,5 +1,5 @@
 ﻿{% for car in page_obj %}    
-<div class="products-row">
+<div class="products-row" onclick="toggleDetails(this)">
   <div class="product-cell"><span>{{ car.car_number }}</span></div>
   <div class="product-cell">
     <div class="chart">
@@ -14,6 +14,7 @@
   <div class="product-cell"><span>{{ car.weight }} тонн</span></div>
   <div class="product-cell"><span>{{ car.shift_day }} г/т/км</span></div>
 </div>
+<div class="details" style="display: none;">Дополнительная информация о автомобиле</div>
 {% endfor %}
 
 <div class="pagination">
@@ -33,3 +34,4 @@
       {% endif %}
   </span>
 </div>
+

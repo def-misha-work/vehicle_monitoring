@@ -650,3 +650,20 @@ body {
   width: 100%; /* Задать ширину SVG в 100% от контейнера */
   height: 100%; /* Задать высоту SVG в 100% от контейнера */
 }
+
+
+.products-row {
+  cursor: pointer;
+  /* margin-bottom: 10px; */
+}
+
+.details {
+  overflow: hidden;
+  transition: height 0.3s ease;
+  background-color: var(--sidebar);;
+  margin-top: 0px; /* чтобы не было отступа между строками */
+  text-align: center;
+  color: #fff;
+  justify-content: center;
+  align-items: center;
+}

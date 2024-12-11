@@ -1,3 +1,16 @@
+function toggleDetails(element) {
+  const details = element.nextElementSibling;
+  if (details.style.display === "none" || details.style.display === "") {
+      details.style.display = "flex";
+      details.style.height = "300px"; // Установить высоту
+  } else {
+      details.style.display = "none";
+      details.style.height = "0";
+  }
+}
+
+
+
 document.querySelector(".jsFilter").addEventListener("click", function () {
     document.querySelector(".filter-menu").classList.toggle("active");
   });
