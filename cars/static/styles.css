@@ -299,6 +299,8 @@ body {
 
 .filter-button-wrapper {
   position: relative;
+  /* Скрываю фильтр */
+  display: none;
 }
 
 .filter-menu {
