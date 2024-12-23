@@ -612,6 +612,9 @@ body {
 .icon-svg {
   filter: brightness(0) saturate(100%) invert(1);
 }
+.light .icon-svg {
+  filter: brightness(0) saturate(100%) invert(0.1);
+}
 .pagination {
   font-size: 14px;
   text-align: center;
@@ -668,4 +671,100 @@ body {
   color: #fff;
   justify-content: center;
   align-items: center;
+}
+
+/* Стили для авторизации */
+
+/* Основной контейнер формы */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Занимает всю высоту экрана */
+  background-color: #f5f5f5; /* Светлый фон */
+}
+
+/* Заголовок формы */
+.login-container h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Форма */
+.login-container form {
+  display: flex;
+  flex-direction: column;
+  width: 300px; /* Фиксированная ширина формы */
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень */
+}
+
+/* Лейблы */
+.login-container label {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #555;
+}
+
+/* Поля ввода */
+.login-container input[type="text"],
+.login-container input[type="password"] {
+  width: 100%; /* Одинаковая ширина */
+  height: 40px; /* Одинаковая высота */
+  padding: 10px; /* Отступы внутри полей */
+  margin-bottom: 15px; /* Отступ между полями */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box; /* Убирает баг с увеличением ширины */
+}
+
+/* Кнопка */
+.login-container button {
+  width: 100%; /* Одинаковая ширина */
+  height: 40px; /* Одинаковая высота */
+  background-color: #007bff; /* Синий цвет */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Анимация при наведении на кнопку */
+.login-container button:hover {
+  background-color: #0056b3; /* Темнее синий */
+}
+
+/* Сообщение об ошибке */
+.login-container .error {
+  color: #dc3545; /* Красный цвет */
+  font-size: 14px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Кнопка "Выйти" */
+.logout-button {
+  display: inline-block; /* Делаем ссылку блочным элементом */
+  width: 160px; /* Ширина кнопки */
+  height: 30px; /* Высота кнопки */
+  line-height: 30px; /* Выравнивание текста по вертикали */
+  text-align: center; /* Выравнивание текста по горизонтали */
+  background-color: #2c394f; /* Цвет фона */
+  color: #ffffff; /* Белый текст */
+  font-size: 14px; /* Размер текста */
+  text-decoration: none; /* Убираем подчеркивание */
+  border-radius: 4px; /* Закругленные углы */
+  transition: background-color 0.3s ease; /* Плавное изменение цвета при наведении */
+}
+
+/* Анимация при наведении */
+.logout-button:hover {
+  background-color: #1f2a3b; /* Темнее цвет фона */
 }
