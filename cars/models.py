@@ -12,7 +12,25 @@ class TimestampMixin(models.Model):
         abstract = True
 
 
+class Jsession(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+    jsession = models.CharField(
+        unique=True,
+        max_length=200
+    )
+
+    def __str__(self):
+        return f"jsession: {self}"
+
+
 class Car(TimestampMixin, models.Model):
+    jsession = models.ForeignKey(
+        Jsession,
+        on_delete=models.CASCADE
+    )
     car_number = models.IntegerField(
         verbose_name='Номер машины',
     )
@@ -38,4 +56,4 @@ class Car(TimestampMixin, models.Model):
         verbose_name_plural = "cars"
 
     def __str__(self):
-        return f"Номер машины: {self.car_number}"
+        return f"Информация по машине: {self.car_number}"

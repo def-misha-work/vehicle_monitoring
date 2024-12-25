@@ -3,17 +3,14 @@ import logging
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import (
-    authenticate,
     login as auth_login,
-    logout as auth_logout
+    logout as auth_logout,
 )
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from cars.models import Car
+from cars.models import Car, Jsession, User
 from cars.constants import (
-    URL_LOGIN,
-    USER_LOGIN,
-    USER_PASSWORD,
+    URL_LOGIN
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -25,7 +22,15 @@ def car_list(request):
     paginator = Paginator(cars, 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    return render(request, "cars/index.html", {"page_obj": page_obj})
+    user = request.user
+    return render(
+        request,
+        "cars/index.html",
+        {
+            "page_obj": page_obj,
+            'user': user
+        }
+    )
 
 
 def login_view(request):
@@ -33,43 +38,37 @@ def login_view(request):
         username = request.POST['username']
         password = request.POST['password']
         # проверяем есть ли юзер в базе клиента
-        URL_GET_ENTER = (
-            f"{URL_LOGIN}?account={USER_LOGIN}&password={USER_PASSWORD}"
+        url_get_jsession = (
+            f"{URL_LOGIN}?account={username}&password={password}"
         )
-        response = requests.get(URL_GET_ENTER)
+        response = requests.get(url_get_jsession)
         try:
             response.raise_for_status()
-            data = response.json()
         except requests.exceptions.HTTPError as e:
             logging.info(f"Ошибка запроса к api {e}")
             return render(
                 request, "cars/login.html",
                 {"error": "Неверный логин или пароль"}
             )
-        # TODO тут надо сделать запрос к базе данных
-        # на предмет наличия "jsession"
+
+        data = response.json()
         if "jsession" not in data:
             logging.info("Ключ 'jsession' отсутствует в ответе")
             return render(
                 request, "cars/login.html",
                 {"error": "Неверный логин или пароль"}
             )
-        if data["jsession"] == "817328fdd0274ce283ec715b215d5b4c":
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                auth_login(request, user)
-                return redirect('car_list')
-            else:
-                return render(
-                    request, "cars/login.html",
-                    {"error": "Неверный логин или пароль"}
-                )
-        # TODO убрать после норм авторизации
-        else:
-            return render(
-                request, "cars/login.html",
-                {"error": "Неверный логин или пароль"}
-            )
+        # Создаем или получаем пользователя
+        user, _ = User.objects.get_or_create(username=username)
+        # Создаем или обновляем Jsession, связывая его с пользователем
+        jsession, created = Jsession.objects.update_or_create(
+            jsession=data["jsession"],
+            # Обновляем поле user, если объект уже существует
+            defaults={'user': user}
+        )
+        auth_login(request, user)
+        return redirect('car_list')
+
     return render(request, "cars/login.html")
 
 
