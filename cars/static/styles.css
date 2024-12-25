@@ -619,10 +619,12 @@ body {
   font-size: 14px;
   text-align: center;
   margin-top: 10px;
-  color: white;
+  /* color: white; */
+  color: var(--app-content-main-color);
 }
 .pagination a {
-  color: white;
+  /* color: white; */
+  color: var(--app-content-main-color);
 }
 
 /* radial_cart */
