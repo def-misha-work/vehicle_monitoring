@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from cars.models import Car, Jsession, User
 from cars.constants import (
-    URL_LOGIN
+    URL_GET_JSESSION
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -39,7 +39,7 @@ def login_view(request):
         password = request.POST['password']
         # проверяем есть ли юзер в базе клиента
         url_get_jsession = (
-            f"{URL_LOGIN}?account={username}&password={password}"
+            f"{URL_GET_JSESSION}?account={username}&password={password}"
         )
         response = requests.get(url_get_jsession)
         try:
