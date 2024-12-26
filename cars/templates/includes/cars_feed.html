@@ -1,6 +1,6 @@
-﻿{% for car in page_obj %}    
+﻿{% for id, fuel, mileage in page_obj %}    
 <div class="products-row" onclick="toggleDetails(this)">
-  <div class="product-cell"><span>{{ car.car_number }}</span></div>
+  <div class="product-cell"><span>{{ id }}</span></div>
   <div class="product-cell">
     <div class="chart">
       <div class="one">80</div>
@@ -8,11 +8,11 @@
       <div class="three">50</div>
   </div>
   </div>
-  <div class="product-cell"><span>{{ car.mileage }} км.</span></div>
-  <div class="product-cell"><span>{{ car.fuel }} литров</span></div>
-  <div class="product-cell"><span>{{ car.flight }} рейсов</span></div>
-  <div class="product-cell"><span>{{ car.weight }} тонн</span></div>
-  <div class="product-cell"><span>{{ car.shift_day }} г/т/км</span></div>
+  <div class="product-cell"><span>{{ mileage }} км.</span></div>
+  <div class="product-cell"><span>{{ fuel }} литров</span></div>
+  <div class="product-cell"><span>позже рейсов</span></div>
+  <div class="product-cell"><span>позже тонн</span></div>
+  <div class="product-cell"><span>позже г/т/км</span></div>
 </div>
 <div class="details" style="display: none;">Дополнительная информация о автомобиле</div>
 {% endfor %}

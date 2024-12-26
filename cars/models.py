@@ -23,7 +23,7 @@ class Jsession(models.Model):
     )
 
     def __str__(self):
-        return f"jsession: {self}"
+        return f"jsession: {self.jsession}"
 
 
 class Car(TimestampMixin, models.Model):

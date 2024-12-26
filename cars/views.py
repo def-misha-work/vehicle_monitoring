@@ -8,9 +8,13 @@ from django.contrib.auth import (
 )
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from cars.models import Car, Jsession, User
+from cars.models import Jsession, User
 from cars.constants import (
     URL_GET_JSESSION
+)
+from cars.utils import (
+    get_tech,
+    get_fuel_and_mileage,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -18,17 +22,52 @@ logging.basicConfig(level=logging.INFO)
 
 @login_required
 def car_list(request):
-    cars = Car.objects.all()
-    paginator = Paginator(cars, 5)
+    user = request.user
+    try:
+        jsession_obj = Jsession.objects.get(user=user)
+        jsession = jsession_obj.jsession
+    except Jsession.DoesNotExist:
+        return render(
+                request, "cars/login.html",
+                {"error": "Ошибка авторизации"}
+            )
+
+    # Получаем технику
+    result = get_tech(jsession)
+    if result is False:
+        return render(
+                request, "cars/login.html",
+                {"error": "Ошибка авторизации"}
+            )
+        logging.critical("Не получили технику")
+    else:
+        vehicle_ids, devidno = result
+    # logging.info(f"Это vehicle_ids {vehicle_ids}")
+    # logging.info(f"Это devidno {devidno}")
+
+    # Получаю топливо и пробег
+    result = get_fuel_and_mileage(jsession, devidno)
+    if result is False:
+        return render(
+                request, "cars/login.html",
+                {"error": "Ошибка авторизации"}
+            )
+        logging.critical("Не получили топливо или пробег")
+    fuel_yl, mileage_lc = result
+    logging.info(f"Это fuel_yl {fuel_yl}")
+    logging.info(f"Это mileage_lc {mileage_lc}")
+
+    # Создаем страницы
+    combined_data = zip(vehicle_ids, mileage_lc, fuel_yl)
+    paginator = Paginator(list(combined_data), 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    user = request.user
     return render(
         request,
         "cars/index.html",
         {
             "page_obj": page_obj,
-            'user': user
+            "user": user,
         }
     )
 
@@ -41,8 +80,8 @@ def login_view(request):
         url_get_jsession = (
             f"{URL_GET_JSESSION}?account={username}&password={password}"
         )
-        response = requests.get(url_get_jsession)
         try:
+            response = requests.get(url_get_jsession)
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
             logging.info(f"Ошибка запроса к api {e}")
