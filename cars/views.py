@@ -37,9 +37,9 @@ def car_list(request):
     if result is False:
         return render(
                 request, "cars/login.html",
-                {"error": "Ошибка авторизации"}
+                {"error": "Время сессии истекло"}
             )
-        logging.critical("Не получили технику")
+        logging.info("Не получили технику")
     else:
         vehicle_ids, devidno = result
     # logging.info(f"Это vehicle_ids {vehicle_ids}")
@@ -50,9 +50,9 @@ def car_list(request):
     if result is False:
         return render(
                 request, "cars/login.html",
-                {"error": "Ошибка авторизации"}
+                {"error": "Время сессии истекло"}
             )
-        logging.critical("Не получили топливо или пробег")
+        logging.info("Не получили топливо или пробег")
     fuel_yl, mileage_lc = result
     logging.info(f"Это fuel_yl {fuel_yl}")
     logging.info(f"Это mileage_lc {mileage_lc}")
@@ -100,10 +100,9 @@ def login_view(request):
         # Создаем или получаем пользователя
         user, _ = User.objects.get_or_create(username=username)
         # Создаем или обновляем Jsession, связывая его с пользователем
-        jsession, created = Jsession.objects.update_or_create(
-            jsession=data["jsession"],
-            # Обновляем поле user, если объект уже существует
-            defaults={'user': user}
+        Jsession.objects.update_or_create(
+            user=user,  # Ищем запись по пользователю
+            defaults={'jsession': data["jsession"]}  # Обновляем поле jsession
         )
         auth_login(request, user)
         return redirect('car_list')

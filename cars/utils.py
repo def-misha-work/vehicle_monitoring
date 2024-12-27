@@ -33,8 +33,14 @@ def get_tech(
     Получаем данные по технике.
     """
     result: dict = get_request(URL_GET_TECH, jsession=jsession)
-    if not result:
+    # Проверяем, есть ли ключ "message" в ответе
+    if "message" in result:
         return False
+
+    # Проверяем, есть ли ключ "vehicles" в ответе
+    if "vehicles" not in result:
+        return False
+
     vehicles_dict: dict = result["vehicles"]
     vehicle_ids: list = [vehicle["id"] for vehicle in vehicles_dict]
     devidno: list = []
@@ -60,7 +66,9 @@ def get_fuel_and_mileage(
             jsession=jsession,
             devIdno=item
         )
-        if not result:
+        if "message" in result:
+            return False
+        if 'status' not in result:
             return False
         for item in result['status']:
             # / 100 получаем литры
