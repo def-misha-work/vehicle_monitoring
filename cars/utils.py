@@ -12,15 +12,12 @@ from cars.constants import (
 
 def get_request(url: str, **params: str) -> Optional[dict]:
     """
-    Выполняет GET-запрос к указанному URL с переданными GET-параметрами.
-    :param url: URL для запроса.
-    :param params: Произвольное количество GET-параметров.
-    :return: Ответ сервера.
+    Выполняет GET-запрос.
     """
     try:
         response = requests.get(url, params=params)
-        response.raise_for_status()  # Проверка на ошибки HTTP
-        return response.json()  # Возвращаем ответ в формате JSON
+        response.raise_for_status()
+        return response.json()
     except requests.exceptions.RequestException as e:
         logging.info(f"Ошибка при выполнении запроса: {e}")
         return None
@@ -36,7 +33,6 @@ def get_tech(
     # Проверяем, есть ли ключ "message" в ответе
     if "message" in result:
         return False
-
     # Проверяем, есть ли ключ "vehicles" в ответе
     if "vehicles" not in result:
         return False
