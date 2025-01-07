@@ -6,6 +6,7 @@ from django.contrib.auth import (
     login as auth_login,
     logout as auth_logout,
 )
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from cars.models import Jsession, User
@@ -15,6 +16,7 @@ from cars.constants import (
 from cars.utils import (
     get_tech,
     get_fuel_and_mileage,
+    get_weight,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -27,40 +29,32 @@ def car_list(request):
         jsession_obj = Jsession.objects.get(user=user)
         jsession = jsession_obj.jsession
     except Jsession.DoesNotExist:
-        # TODO доделать редирект с тестом
+        messages.error(request, "Ошибка авторизации")
         return redirect('login')
-        # return render(
-        #         request, "cars/login.html",
-        #         {"error": "Ошибка авторизации"}
-        #     )
 
     # Получаем технику
-    result = get_tech(jsession)
-    if result is False:
-        return render(
-                request, "cars/login.html",
-                {"error": "Время сессии истекло"}
-            )
+    devidno = get_tech(jsession)
+    logging.info(f"Это devidno {devidno}")
+    if devidno is False:
         logging.info("Не получили технику")
-    else:
-        vehicle_ids, devidno = result
-    # logging.info(f"Это vehicle_ids {vehicle_ids}")
-    # logging.info(f"Это devidno {devidno}")
+        messages.error(request, "Время сессии истекло")
+        return redirect('login')
 
     # Получаю топливо и пробег
     result = get_fuel_and_mileage(jsession, devidno)
     if result is False:
-        return render(
-                request, "cars/login.html",
-                {"error": "Время сессии истекло"}
-            )
         logging.info("Не получили топливо или пробег")
+        messages.error(request, "Время сессии истекло")
+        return redirect('login')
+
     fuel_yl, mileage_lc = result
     logging.info(f"Это fuel_yl {fuel_yl}")
     logging.info(f"Это mileage_lc {mileage_lc}")
 
+    # Получаем вес
+    weight_p2 = get_weight(jsession, devidno)
     # Создаем страницы
-    combined_data = zip(vehicle_ids, mileage_lc, fuel_yl)
+    combined_data = zip(devidno, mileage_lc, fuel_yl, weight_p2)
     paginator = Paginator(list(combined_data), 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
