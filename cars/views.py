@@ -8,6 +8,7 @@ from django.contrib.auth import (
 )
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator
 from cars.models import Jsession, User
 from cars.constants import (
@@ -22,6 +23,7 @@ from cars.utils import (
 logging.basicConfig(level=logging.INFO)
 
 
+@cache_page(60 * 15)
 @login_required
 def car_list(request):
     user = request.user
