@@ -3,6 +3,7 @@ import requests
 import logging
 import pytz
 
+from cryptography.fernet import Fernet
 from functools import wraps
 from typing import Optional, Tuple, Callable, Any
 from datetime import datetime
@@ -11,7 +12,18 @@ from cars.constants import (
     URL_GET_TECH,
     URL_GET_FUEL,
     URL_GET_WEIGHT,
+    KEY,
 )
+
+
+def encrypt_password(password):
+    fernet = Fernet(KEY)
+    return fernet.encrypt(password.encode()).decode()
+
+
+def decrypt_password(encrypted_password):
+    fernet = Fernet(KEY)
+    return fernet.decrypt(encrypted_password.encode()).decode()
 
 
 def time_it(func: Callable) -> Callable:

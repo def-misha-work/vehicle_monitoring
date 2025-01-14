@@ -1,59 +1,115 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
+
 User = get_user_model()
 
 
-class TimestampMixin(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
+class UserPassword(models.Model):
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="encrypted_password"
+    )
+    encrypted_password = models.CharField(max_length=255)
 
 
 class Jsession(models.Model):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name="jsession"
     )
-    jsession = models.CharField(
-        unique=True,
-        max_length=200
-    )
+    jsession = models.CharField(max_length=255)
 
     def __str__(self):
         return f"jsession: {self.jsession}"
 
 
-class Car(TimestampMixin, models.Model):
-    jsession = models.ForeignKey(
-        Jsession,
-        on_delete=models.CASCADE
+class Toplivo(models.Model):
+    dt = models.DateTimeField()
+    ostatok_na_tekushchii_moment = models.FloatField()
+    raskhod_za_period = models.FloatField()
+    raskhod_za_poezdku = models.FloatField()
+    raskhod_na_khkh_za_period = models.FloatField()
+    raskhod_pod_nagruzkoi_za_period = models.FloatField()
+    raskhod_v_puti_za_period = models.FloatField()
+    raskhod_privedennii_g_t_km_za_period = models.FloatField()
+    raskhod_privedennii_g_t_km_obshchii = models.FloatField()
+
+
+class DatchikVesa(models.Model):
+    dt = models.DateTimeField()
+    tekushchaya_nagruzka = models.FloatField()
+    summarnii_ves_za_period = models.FloatField()
+    min_ves_za_period = models.FloatField()
+    max_ves_za_period = models.FloatField()
+    srednii_ves_reisa_za_period = models.FloatField()
+
+
+class Probeg(models.Model):
+    dt = models.DateTimeField()
+    probeg_na_segodnya = models.FloatField()
+    probeg_na_segodnya = models.FloatField()
+    probeg_za_period = models.FloatField()
+    kolichestvo_reisov = models.FloatField()
+    kolichestvo_poezdok_za_period = models.FloatField()
+
+
+class Vremya(models.Model):
+    dt = models.DateTimeField()
+    vremya_s_nachala_perioda = models.FloatField()
+    vremya_raboty_dvigatelya_za_period = models.FloatField()
+    vremya_hkh_za_period = models.FloatField()
+    motochasy_obshchie = models.FloatField()
+    motochasy_za_period = models.FloatField()
+
+
+class Shini(models.Model):
+    dt = models.DateTimeField()
+    davlenie_d_shinah = models.FloatField()
+
+
+class Cars(models.Model):
+    id_car = models.CharField(max_length=255)
+    account_name = models.ManyToManyField(
+        User,
+        related_name="cars",
+        verbose_name="Пользователи",
+        blank=True,
     )
-    car_number = models.IntegerField(
-        verbose_name='Номер машины',
+    toplivo = models.ForeignKey(
+        Toplivo,
+        related_name="cars",
+        verbose_name="Топливо",
+        on_delete=models.CASCADE,
     )
-    mileage = models.IntegerField(
-        verbose_name='Пробег',
+    datchik_vesa = models.ForeignKey(
+        DatchikVesa,
+        related_name="cars",
+        verbose_name="Датчик веса",
+        on_delete=models.CASCADE,
     )
-    fuel = models.IntegerField(
-        verbose_name='Расход топлива',
+    probeg = models.ForeignKey(
+        Probeg,
+        related_name="cars",
+        verbose_name="Пробег",
+        on_delete=models.CASCADE,
     )
-    flight = models.IntegerField(
-        verbose_name='Рейсы',
+    vremya = models.ForeignKey(
+        Vremya,
+        related_name="cars",
+        verbose_name="Время",
+        on_delete=models.CASCADE,
     )
-    weight = models.IntegerField(
-        verbose_name='Вес машины',
-    )
-    shift_day = models.IntegerField(
-        verbose_name='Смена сутки г/т/км',
+    shini = models.ForeignKey(
+        Shini,
+        related_name="cars",
+        verbose_name="Давление в шинах",
+        on_delete=models.CASCADE,
     )
 
     class Meta:
-        ordering = ("-created_at",)
         verbose_name = "car"
         verbose_name_plural = "cars"
 
     def __str__(self):
-        return f"Информация по машине: {self.car_number}"
+        return f"Информация по машине: {self.id_car}"

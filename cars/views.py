@@ -10,15 +10,16 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator
-from cars.models import Jsession, User
-from cars.constants import (
-    URL_GET_JSESSION
-)
+
+from cars.models import Jsession, User, UserPassword
+from cars.constants import URL_GET_JSESSION
 from cars.utils import (
     get_tech,
     get_fuel_and_mileage,
     get_weight,
+    encrypt_password,
 )
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -99,12 +100,19 @@ def login_view(request):
             request, "cars/login.html",
             {"error": "Неверный логин или пароль"}
         )
+
     # Создаем или получаем пользователя
     user, _ = User.objects.get_or_create(username=username)
+    # Шифруем пароль, сохраняем его.
+    encrypted_password = encrypt_password(password)
+    UserPassword.objects.update_or_create(
+        user=user,
+        defaults={'encrypted_password': encrypted_password}
+    )
     # Создаем или обновляем Jsession, связывая его с пользователем
     Jsession.objects.update_or_create(
-        user=user,  # Ищем запись по пользователю
-        defaults={'jsession': data["jsession"]}  # Обновляем поле jsession
+        user=user,
+        defaults={'jsession': data["jsession"]}
     )
     auth_login(request, user)
     return redirect('car_list')
