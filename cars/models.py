@@ -69,7 +69,10 @@ class Shini(models.Model):
 
 
 class Cars(models.Model):
-    id_car = models.CharField(max_length=255)
+    id_car = models.CharField(
+        max_length=255,
+        unique=True,
+    )
     account_name = models.ManyToManyField(
         User,
         related_name="cars",
@@ -81,30 +84,35 @@ class Cars(models.Model):
         related_name="cars",
         verbose_name="Топливо",
         on_delete=models.CASCADE,
+        null=True,
     )
     datchik_vesa = models.ForeignKey(
         DatchikVesa,
         related_name="cars",
         verbose_name="Датчик веса",
         on_delete=models.CASCADE,
+        null=True,
     )
     probeg = models.ForeignKey(
         Probeg,
         related_name="cars",
         verbose_name="Пробег",
         on_delete=models.CASCADE,
+        null=True,
     )
     vremya = models.ForeignKey(
         Vremya,
         related_name="cars",
         verbose_name="Время",
         on_delete=models.CASCADE,
+        null=True,
     )
     shini = models.ForeignKey(
         Shini,
         related_name="cars",
         verbose_name="Давление в шинах",
         on_delete=models.CASCADE,
+        null=True,
     )
 
     class Meta:
