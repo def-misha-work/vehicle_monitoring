@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator
 
-from cars.models import Jsession, User, UserPassword
+from cars.models import Jsession, User, UserPassword, Cars
 from cars.constants import URL_GET_JSESSION
 from cars.utils import (
     get_tech,
@@ -22,6 +22,31 @@ from cars.utils import (
 
 
 logging.basicConfig(level=logging.INFO)
+
+@login_required
+def new_car_list(request):
+    user = request.user
+    try:
+        jsession_obj = Jsession.objects.get(user=user)
+        jsession = jsession_obj.jsession
+    except Jsession.DoesNotExist:
+        messages.error(request, "Ошибка авторизации")
+        return redirect('login')
+
+    # Создаем страницы
+    cars = Cars.objects.all()
+    # cars = Cars.objects.select_related("cars").all()
+    paginator = Paginator(cars, 5)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(
+        request,
+        "cars/index.html",
+        {
+            "page_obj": page_obj,
+            "user": user,
+        }
+    )
 
 
 @cache_page(60 * 15)

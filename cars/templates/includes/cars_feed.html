@@ -1,18 +1,18 @@
-﻿{% for id, fuel, mileage, weight in page_obj %}    
+﻿{% for car in page_obj %}    
 <div class="products-row" onclick="toggleDetails(this)">
-  <div class="product-cell"><span>{{ id }}</span></div>
+  <div class="product-cell"><span>{{ car.id_car }}</span></div>
   <div class="product-cell">
     <div class="chart">
-      <div class="one">80</div>
-      <div class="two">70</div>
-      <div class="three">50</div>
+      <div class="one">{{ car.datchik_vesa.summarnii_ves_za_period|floatformat:"0" }}</div>
+      <div class="two">{{ car.toplivo.raskhod_privedennii_g_t_km_za_period|floatformat:"0" }}</div>
+      <div class="three">{{ car.probeg.kolichestvo_poezdok_za_period|floatformat:"0" }}</div>
   </div>
   </div>
-  <div class="product-cell"><span>{{ mileage }} км.</span></div>
-  <div class="product-cell"><span>{{ fuel }} литров</span></div>
-  <div class="product-cell"><span>позже рейсов</span></div>
-  <div class="product-cell"><span>{{ weight }}</span></div>
-  <div class="product-cell"><span>позже г/т/км</span></div>
+  <div class="product-cell"><span>{{ car.probeg.probeg_za_period|floatformat:2 }} км.</span></div>
+  <div class="product-cell"><span>{{ car.toplivo.raskhod_pod_nagruzkoi_za_period|floatformat:2 }} литров</span></div>
+  <div class="product-cell"><span>{{ car.probeg.kolichestvo_poezdok_za_period|floatformat:2 }} рейсов</span></div>
+  <div class="product-cell"><span>{{ car.datchik_vesa.summarnii_ves_za_period|floatformat:2 }} тонн</span></div>
+  <div class="product-cell"><span>{{ car.vremya.vremya_hkh_za_period|floatformat:2 }} г/т/км</span></div>
 </div>
 <div class="details" style="display: none;">Дополнительная информация о автомобиле</div>
 {% endfor %}
