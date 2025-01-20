@@ -13,11 +13,21 @@
       <div class="chart_nums_blue">{{ car.toplivo.ostatok_na_tekushchii_moment|floatformat:"0" }}</div>
     </div>
   </div>
-  <div class="product-cell"><span>{{ car.probeg.probeg_za_period|floatformat:2 }} км.</span></div>
-  <div class="product-cell"><span>{{ car.toplivo.raskhod_za_period|floatformat:2 }} литров</span></div>
-  <div class="product-cell"><span>{{ car.probeg.kolichestvo_reisov|floatformat:2 }} рейсов</span></div>
-  <div class="product-cell"><span>{{ car.datchik_vesa.summarnii_ves_za_period|floatformat:2 }} тонн</span></div>
-  <div class="product-cell"><span>{{ car.toplivo.raskhod_privedennii_g_t_km_za_period|floatformat:2 }} г/т/км</span></div>
+  <div class="product-cell">
+    <span>{{ car.probeg.probeg_za_period|floatformat:2 }} км.</span>
+  </div>
+  <div class="product-cell">
+    <span>{{ car.toplivo.raskhod_za_period|floatformat:2 }} литров</span>
+  </div>
+  <div class="product-cell">
+    <span>{{ car.probeg.kolichestvo_reisov|floatformat:2 }} рейсов</span>
+  </div>
+  <div class="product-cell">
+    <span>{{ car.datchik_vesa.summarnii_ves_za_period|floatformat:2 }} тонн</span>
+  </div>
+  <div class="product-cell">
+    <span>{{ car.toplivo.raskhod_privedennii_g_t_km_za_period|floatformat:2 }} г/т/км</span>
+  </div>
 </div>
 <div class="details" style="display: none;">Дополнительная информация о автомобиле</div>
 {% endfor %}

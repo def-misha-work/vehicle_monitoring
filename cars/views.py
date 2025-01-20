@@ -1,6 +1,8 @@
 import requests
 import logging
 
+from datetime import timedelta
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import (
     login as auth_login,
@@ -8,10 +10,22 @@ from django.contrib.auth import (
 )
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Prefetch, Q
 from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator
+from django.utils import timezone
 
-from cars.models import Jsession, User, UserPassword, Cars
+from cars.models import (
+    Jsession,
+    User,
+    UserPassword,
+    Cars,
+    Toplivo,
+    DatchikVesa,
+    Vremya,
+    Probeg,
+    Shini,
+)
 from cars.constants import URL_GET_JSESSION
 from cars.utils import (
     get_tech,
@@ -23,8 +37,9 @@ from cars.utils import (
 
 logging.basicConfig(level=logging.INFO)
 
+
 @login_required
-def new_car_list(request):
+def car_list_today(request):
     user = request.user
     logging.info(f"User: {user}")
     try:
@@ -34,18 +49,82 @@ def new_car_list(request):
         messages.error(request, "Ошибка авторизации")
         return redirect('login')
 
-    # Создаем страницы
-    cars = Cars.objects.all().order_by('id')
-    # cars = Cars.objects.select_related("cars").all()
+    # Определяем диапазон дат для "сегодня"
+    now = timezone.now()
+    start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_date = now
+
+    # Загружаем данные из Cars и связанные модели
+    cars = Cars.objects.all().order_by('id').prefetch_related(
+        Prefetch('toplivo', queryset=Toplivo.objects.all()),
+        Prefetch('datchik_vesa', queryset=DatchikVesa.objects.all()),
+        Prefetch('probeg', queryset=Probeg.objects.all()),
+        Prefetch('vremya', queryset=Vremya.objects.all()),
+        Prefetch('shini', queryset=Shini.objects.all())
+    )
+
+    # Фильтрация по периоду "сегодня"
+    # cars = cars.filter(dt__range=(start_date, end_date)).distinct()
+
+    logging.info(f"Дата фильтрации: start_date: {start_date}, end_date: {end_date}")
+    logging.info(f"Количество машин за сегодня: {cars.count()}")
+
+    # Пагинация
     paginator = Paginator(cars, 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
+
     return render(
         request,
         "cars/index.html",
         {
             "page_obj": page_obj,
             "user": user,
+            "period": "today",  # Передаем период в шаблон для отображения
+        }
+    )
+
+
+@login_required
+def car_list_yesterday(request):
+    user = request.user
+    logging.info(f"User: {user}")
+    try:
+        jsession_obj = Jsession.objects.get(user=user)
+        jsession = jsession_obj.jsession
+    except Jsession.DoesNotExist:
+        messages.error(request, "Ошибка авторизации")
+        return redirect('login')
+
+    # Определяем диапазон дат для "вчера"
+    now = timezone.now()
+    start_date = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    end_date = start_date + timedelta(days=1)
+
+    # Загружаем данные из Cars и связанные модели
+    cars = Cars.objects.all().order_by('id').prefetch_related(
+        Prefetch('toplivo', queryset=Toplivo.objects.filter(dt__range=(start_date, end_date))),
+        Prefetch('datchik_vesa', queryset=DatchikVesa.objects.filter(dt__range=(start_date, end_date))),
+        Prefetch('probeg', queryset=Probeg.objects.filter(dt__range=(start_date, end_date))),
+        Prefetch('vremya', queryset=Vremya.objects.filter(dt__range=(start_date, end_date))),
+        Prefetch('shini', queryset=Shini.objects.filter(dt__range=(start_date, end_date))),
+    )
+
+    logging.info(f"Дата фильтрации: start_date: {start_date}, end_date: {end_date}")
+    logging.info(f"Количество машин за вчера: {cars.count()}")
+
+    # Пагинация
+    paginator = Paginator(cars, 5)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "cars/index.html",
+        {
+            "page_obj": page_obj,
+            "user": user,
+            "period": "yesterday",  # Передаем период в шаблон для отображения
         }
     )
 
