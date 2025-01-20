@@ -664,6 +664,19 @@ body {
   /* margin-bottom: 10px; */
 }
 
+.product-cell-row {
+  flex-direction: row !important;
+}
+.chart_nums_red {
+  color: #e90b3a;
+}
+.chart_nums_green {
+  color: #a0ff03;
+}
+.chart_nums_blue {
+  color: #1ad5de;
+}
+
 .details {
   overflow: hidden;
   transition: height 0.3s ease;
