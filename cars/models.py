@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 
 User = get_user_model()
@@ -25,7 +26,7 @@ class Jsession(models.Model):
 
 
 class Toplivo(models.Model):
-    dt = models.DateTimeField()
+    dt = models.DateTimeField(default=timezone.now)
     ostatok_na_tekushchii_moment = models.FloatField()
     raskhod_za_period = models.FloatField()
     raskhod_za_poezdku = models.FloatField()
@@ -37,7 +38,7 @@ class Toplivo(models.Model):
 
 
 class DatchikVesa(models.Model):
-    dt = models.DateTimeField()
+    dt = models.DateTimeField(default=timezone.now)
     tekushchaya_nagruzka = models.FloatField()
     summarnii_ves_za_period = models.FloatField()
     min_ves_za_period = models.FloatField()
@@ -46,8 +47,7 @@ class DatchikVesa(models.Model):
 
 
 class Probeg(models.Model):
-    dt = models.DateTimeField()
-    probeg_na_segodnya = models.FloatField()
+    dt = models.DateTimeField(default=timezone.now)
     probeg_na_segodnya = models.FloatField()
     probeg_za_period = models.FloatField()
     kolichestvo_reisov = models.FloatField()
@@ -55,7 +55,7 @@ class Probeg(models.Model):
 
 
 class Vremya(models.Model):
-    dt = models.DateTimeField()
+    dt = models.DateTimeField(default=timezone.now)
     vremya_s_nachala_perioda = models.FloatField()
     vremya_raboty_dvigatelya_za_period = models.FloatField()
     vremya_hkh_za_period = models.FloatField()
@@ -64,11 +64,12 @@ class Vremya(models.Model):
 
 
 class Shini(models.Model):
-    dt = models.DateTimeField()
-    davlenie_d_shinah = models.FloatField()
+    dt = models.DateTimeField(default=timezone.now)
+    davlenie_v_shinah = models.FloatField()
 
 
 class Cars(models.Model):
+    dt = models.DateTimeField(default=timezone.now)
     id_car = models.CharField(
         max_length=255,
         unique=True,

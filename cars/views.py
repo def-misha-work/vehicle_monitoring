@@ -26,6 +26,7 @@ logging.basicConfig(level=logging.INFO)
 @login_required
 def new_car_list(request):
     user = request.user
+    logging.info(f"User: {user}")
     try:
         jsession_obj = Jsession.objects.get(user=user)
         jsession = jsession_obj.jsession
@@ -34,7 +35,7 @@ def new_car_list(request):
         return redirect('login')
 
     # Создаем страницы
-    cars = Cars.objects.all()
+    cars = Cars.objects.all().order_by('id')
     # cars = Cars.objects.select_related("cars").all()
     paginator = Paginator(cars, 5)
     page_number = request.GET.get("page")
