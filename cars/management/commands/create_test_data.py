@@ -15,7 +15,7 @@ class Command(BaseCommand):
             user.save()
 
         # Создаем или обновляем 15 машин с id_car от 00001 до 00015
-        for i in range(1, 16):
+        for i in range(1, 1):
             id_car = f"{i:05d}"  # Форматируем id_car с ведущими нулями
 
             # Получаем или создаем машину
@@ -23,8 +23,14 @@ class Command(BaseCommand):
             car.account_name.add(user)  # Связываем машину с тестовым пользователем
 
             # Создаем или обновляем данные за последние 90 дней
-            for day in range(90):
-                dt = timezone.now() - timezone.timedelta(days=day)
+            for day in range(3):
+                # Получаем дату с 0:00
+                start_of_day = timezone.now().date() - timezone.timedelta(days=day)
+                start_of_day = timezone.datetime.combine(start_of_day, timezone.datetime.min.time())
+    
+                # Получаем дату с 23:59
+                end_of_day = start_of_day + timezone.timedelta(days=1) - timezone.timedelta(seconds=1)
+                print(f"День {day}: {start_of_day} до {end_of_day}")
 
                 # Создаем данные для Toplivo
                 toplivo = Toplivo.objects.create(
@@ -83,5 +89,5 @@ class Command(BaseCommand):
                 car.save()
 
         self.stdout.write(
-            self.style.SUCCESS('Данные успешно созданы или обновлены для 15 машин за последние 90 дней!')
+            self.style.SUCCESS('Данные успешно созданы или обновлены.')
         )

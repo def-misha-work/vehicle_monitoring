@@ -38,6 +38,10 @@ from cars.utils import (
 logging.basicConfig(level=logging.INFO)
 
 
+def check_auth(request):
+    pass
+    
+
 @login_required
 def car_list_today(request):
     user = request.user
@@ -64,7 +68,7 @@ def car_list_today(request):
     )
 
     # Фильтрация по периоду "сегодня"
-    # cars = cars.filter(dt__range=(start_date, end_date)).distinct()
+    cars = cars.filter(dt__range=(start_date, end_date)).distinct()
 
     logging.info(f"Дата фильтрации: start_date: {start_date}, end_date: {end_date}")
     logging.info(f"Количество машин за сегодня: {cars.count()}")
@@ -103,11 +107,11 @@ def car_list_yesterday(request):
 
     # Загружаем данные из Cars и связанные модели
     cars = Cars.objects.all().order_by('id').prefetch_related(
-        Prefetch('toplivo', queryset=Toplivo.objects.filter(dt__range=(start_date, end_date))),
-        Prefetch('datchik_vesa', queryset=DatchikVesa.objects.filter(dt__range=(start_date, end_date))),
-        Prefetch('probeg', queryset=Probeg.objects.filter(dt__range=(start_date, end_date))),
-        Prefetch('vremya', queryset=Vremya.objects.filter(dt__range=(start_date, end_date))),
-        Prefetch('shini', queryset=Shini.objects.filter(dt__range=(start_date, end_date))),
+        Prefetch('toplivo', queryset=Toplivo.objects.filter(lt__range=(start_date, end_date))),
+        Prefetch('datchik_vesa', queryset=DatchikVesa.objects.filter(lt__range=(start_date, end_date))),
+        Prefetch('probeg', queryset=Probeg.objects.filter(lt__range=(start_date, end_date))),
+        Prefetch('vremya', queryset=Vremya.objects.filter(lt__range=(start_date, end_date))),
+        Prefetch('shini', queryset=Shini.objects.filter(lt__range=(start_date, end_date))),
     )
 
     logging.info(f"Дата фильтрации: start_date: {start_date}, end_date: {end_date}")
@@ -129,51 +133,51 @@ def car_list_yesterday(request):
     )
 
 
-@cache_page(60 * 15)
-@login_required
-def car_list(request):
-    user = request.user
-    try:
-        jsession_obj = Jsession.objects.get(user=user)
-        jsession = jsession_obj.jsession
-    except Jsession.DoesNotExist:
-        messages.error(request, "Ошибка авторизации")
-        return redirect('login')
+# @cache_page(60 * 15)
+# @login_required
+# def car_list(request):
+#     user = request.user
+#     try:
+#         jsession_obj = Jsession.objects.get(user=user)
+#         jsession = jsession_obj.jsession
+#     except Jsession.DoesNotExist:
+#         messages.error(request, "Ошибка авторизации")
+#         return redirect('login')
 
-    # Получаем технику
-    devidno = get_tech(jsession)
-    logging.info(f"Это devidno {devidno}")
-    if devidno is False:
-        logging.info("Не получили технику")
-        messages.error(request, "Время сессии истекло")
-        return redirect('login')
+#     # Получаем технику
+#     devidno = get_tech(jsession)
+#     logging.info(f"Это devidno {devidno}")
+#     if devidno is False:
+#         logging.info("Не получили технику")
+#         messages.error(request, "Время сессии истекло")
+#         return redirect('login')
 
-    # Получаю топливо и пробег
-    result = get_fuel_and_mileage(jsession, devidno)
-    if result is False:
-        logging.info("Не получили топливо или пробег")
-        messages.error(request, "Время сессии истекло")
-        return redirect('login')
+#     # Получаю топливо и пробег
+#     result = get_fuel_and_mileage(jsession, devidno)
+#     if result is False:
+#         logging.info("Не получили топливо или пробег")
+#         messages.error(request, "Время сессии истекло")
+#         return redirect('login')
 
-    fuel_yl, mileage_lc = result
-    logging.info(f"Это fuel_yl {fuel_yl}")
-    logging.info(f"Это mileage_lc {mileage_lc}")
+#     fuel_yl, mileage_lc = result
+#     logging.info(f"Это fuel_yl {fuel_yl}")
+#     logging.info(f"Это mileage_lc {mileage_lc}")
 
-    # Получаем вес
-    weight_p2 = get_weight(jsession, devidno)
-    # Создаем страницы
-    combined_data = zip(devidno, mileage_lc, fuel_yl, weight_p2)
-    paginator = Paginator(list(combined_data), 5)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-    return render(
-        request,
-        "cars/index.html",
-        {
-            "page_obj": page_obj,
-            "user": user,
-        }
-    )
+#     # Получаем вес
+#     weight_p2 = get_weight(jsession, devidno)
+#     # Создаем страницы
+#     combined_data = zip(devidno, mileage_lc, fuel_yl, weight_p2)
+#     paginator = Paginator(list(combined_data), 5)
+#     page_number = request.GET.get("page")
+#     page_obj = paginator.get_page(page_number)
+#     return render(
+#         request,
+#         "cars/index.html",
+#         {
+#             "page_obj": page_obj,
+#             "user": user,
+#         }
+#     )
 
 
 def login_view(request):
@@ -220,7 +224,7 @@ def login_view(request):
         defaults={'jsession': data["jsession"]}
     )
     auth_login(request, user)
-    return redirect('car_list')
+    return redirect('car_list_today')
 
 
 def logout_view(request):
