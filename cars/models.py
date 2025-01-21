@@ -25,54 +25,11 @@ class Jsession(models.Model):
         return f"jsession: {self.jsession}"
 
 
-class Toplivo(models.Model):
-    dt = models.DateTimeField(default=timezone.now)
-    ostatok_na_tekushchii_moment = models.FloatField()
-    raskhod_za_period = models.FloatField()
-    raskhod_za_poezdku = models.FloatField()
-    raskhod_na_khkh_za_period = models.FloatField()
-    raskhod_pod_nagruzkoi_za_period = models.FloatField()
-    raskhod_v_puti_za_period = models.FloatField()
-    raskhod_privedennii_g_t_km_za_period = models.FloatField()
-    raskhod_privedennii_g_t_km_obshchii = models.FloatField()
-
-
-class DatchikVesa(models.Model):
-    dt = models.DateTimeField(default=timezone.now)
-    tekushchaya_nagruzka = models.FloatField()
-    summarnii_ves_za_period = models.FloatField()
-    min_ves_za_period = models.FloatField()
-    max_ves_za_period = models.FloatField()
-    srednii_ves_reisa_za_period = models.FloatField()
-
-
-class Probeg(models.Model):
-    dt = models.DateTimeField(default=timezone.now)
-    probeg_na_segodnya = models.FloatField()
-    probeg_za_period = models.FloatField()
-    kolichestvo_reisov = models.FloatField()
-    kolichestvo_poezdok_za_period = models.FloatField()
-
-
-class Vremya(models.Model):
-    dt = models.DateTimeField(default=timezone.now)
-    vremya_s_nachala_perioda = models.FloatField()
-    vremya_raboty_dvigatelya_za_period = models.FloatField()
-    vremya_hkh_za_period = models.FloatField()
-    motochasy_obshchie = models.FloatField()
-    motochasy_za_period = models.FloatField()
-
-
-class Shini(models.Model):
-    dt = models.DateTimeField(default=timezone.now)
-    davlenie_v_shinah = models.FloatField()
-
-
 class Cars(models.Model):
-    dt = models.DateTimeField(default=timezone.now)
     id_car = models.CharField(
         max_length=255,
         unique=True,
+        verbose_name="Идентификатор машины",
     )
     account_name = models.ManyToManyField(
         User,
@@ -80,45 +37,156 @@ class Cars(models.Model):
         verbose_name="Пользователи",
         blank=True,
     )
-    toplivo = models.ForeignKey(
-        Toplivo,
-        related_name="cars",
-        verbose_name="Топливо",
+
+    class Meta:
+        verbose_name = "Машина"
+        verbose_name_plural = "Машины"
+
+    def __str__(self):
+        return f"Машина: {self.id_car}"
+
+
+class DailyData(models.Model):
+    car = models.ForeignKey(
+        Cars,
+        related_name="daily_data",
+        verbose_name="Машина",
         on_delete=models.CASCADE,
-        null=True,
     )
-    datchik_vesa = models.ForeignKey(
-        DatchikVesa,
-        related_name="cars",
-        verbose_name="Датчик веса",
-        on_delete=models.CASCADE,
-        null=True,
+    dt = models.DateTimeField(
+        default=timezone.now,
+        verbose_name="Дата и время",
     )
-    probeg = models.ForeignKey(
-        Probeg,
-        related_name="cars",
-        verbose_name="Пробег",
-        on_delete=models.CASCADE,
+
+    # Топливо
+    ostatok_na_tekushchii_moment = models.FloatField(
+        verbose_name="Остаток на текущий момент",
         null=True,
+        blank=True,
     )
-    vremya = models.ForeignKey(
-        Vremya,
-        related_name="cars",
-        verbose_name="Время",
-        on_delete=models.CASCADE,
+    raskhod_za_period = models.FloatField(
+        verbose_name="Расход за период",
         null=True,
+        blank=True,
     )
-    shini = models.ForeignKey(
-        Shini,
-        related_name="cars",
+    raskhod_za_poezdku = models.FloatField(
+        verbose_name="Расход за поездку",
+        null=True,
+        blank=True,
+    )
+    raskhod_na_khkh_za_period = models.FloatField(
+        verbose_name="Расход на ХХ за период",
+        null=True,
+        blank=True,
+    )
+    raskhod_pod_nagruzkoi_za_period = models.FloatField(
+        verbose_name="Расход под нагрузкой за период",
+        null=True,
+        blank=True,
+    )
+    raskhod_v_puti_za_period = models.FloatField(
+        verbose_name="Расход в пути за период",
+        null=True,
+        blank=True,
+    )
+    raskhod_privedennii_g_t_km_za_period = models.FloatField(
+        verbose_name="Приведенный расход г/т*км за период",
+        null=True,
+        blank=True,
+    )
+    raskhod_privedennii_g_t_km_obshchii = models.FloatField(
+        verbose_name="Общий приведенный расход г/т*км",
+        null=True,
+        blank=True,
+    )
+
+    # Датчик веса
+    tekushchaya_nagruzka = models.FloatField(
+        verbose_name="Текущая нагрузка",
+        null=True,
+        blank=True,
+    )
+    summarnii_ves_za_period = models.FloatField(
+        verbose_name="Суммарный вес за период",
+        null=True,
+        blank=True,
+    )
+    min_ves_za_period = models.FloatField(
+        verbose_name="Минимальный вес за период",
+        null=True,
+        blank=True,
+    )
+    max_ves_za_period = models.FloatField(
+        verbose_name="Максимальный вес за период",
+        null=True,
+        blank=True,
+    )
+    srednii_ves_reisa_za_period = models.FloatField(
+        verbose_name="Средний вес рейса за период",
+        null=True,
+        blank=True,
+    )
+
+    # Пробег
+    probeg_na_segodnya = models.FloatField(
+        verbose_name="Пробег на сегодня",
+        null=True,
+        blank=True,
+    )
+    probeg_za_period = models.FloatField(
+        verbose_name="Пробег за период",
+        null=True,
+        blank=True,
+    )
+    kolichestvo_reisov = models.FloatField(
+        verbose_name="Количество рейсов",
+        null=True,
+        blank=True,
+    )
+    kolichestvo_poezdok_za_period = models.FloatField(
+        verbose_name="Количество поездок за период",
+        null=True,
+        blank=True,
+    )
+
+    # Время
+    vremya_s_nachala_perioda = models.FloatField(
+        verbose_name="Время с начала периода",
+        null=True,
+        blank=True,
+    )
+    vremya_raboty_dvigatelya_za_period = models.FloatField(
+        verbose_name="Время работы двигателя за период",
+        null=True,
+        blank=True,
+    )
+    vremya_hkh_za_period = models.FloatField(
+        verbose_name="Время ХХ за период",
+        null=True,
+        blank=True,
+    )
+    motochasy_obshchie = models.FloatField(
+        verbose_name="Моточасы общие",
+        null=True,
+        blank=True,
+    )
+    motochasy_za_period = models.FloatField(
+        verbose_name="Моточасы за период",
+        null=True,
+        blank=True,
+    )
+
+    # Шины
+    davlenie_v_shinah = models.FloatField(
         verbose_name="Давление в шинах",
-        on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
 
     class Meta:
-        verbose_name = "car"
-        verbose_name_plural = "cars"
+        verbose_name = "Ежедневные данные"
+        verbose_name_plural = "Ежедневные данные"
+        unique_together = ('car', 'dt')  # Уникальная запись для машины и даты
 
     def __str__(self):
-        return f"Информация по машине: {self.id_car}"
+        return f"Данные для {self.car.id_car} на {self.dt}"

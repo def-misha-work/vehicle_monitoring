@@ -1,32 +1,32 @@
-﻿{% for car in page_obj %}    
+﻿{% for obj in page_obj %}    
 <div class="products-row" onclick="toggleDetails(this)">
-  <div class="product-cell"><span>{{ car.id_car }}</span></div>
+  <div class="product-cell"><span>{{ obj.car.id_car }}</span></div>
   <div class="product-cell product-cell-row">
     <div class="chart">
-      <div class="one">{{ car.datchik_vesa.tekushchaya_nagruzka|floatformat:"0" }}</div>
-      <div class="two">{{ car.probeg.kolichestvo_reisov|floatformat:"0" }}</div>
-      <div class="three">{{ car.toplivo.ostatok_na_tekushchii_moment|floatformat:"0" }}</div>
+      <div class="one">{{ obj.tekushchaya_nagruzka|floatformat:"0" }}</div>
+      <div class="two">{{ obj.kolichestvo_reisov|floatformat:"0" }}</div>
+      <div class="three">{{ obj.ostatok_na_tekushchii_moment|floatformat:"0" }}</div>
     </div>
     <div class="chart_nums">
-      <div class="chart_nums_red">{{ car.datchik_vesa.tekushchaya_nagruzka|floatformat:"0" }}</div>
-      <div class="chart_nums_green">{{ car.probeg.kolichestvo_reisov|floatformat:"0" }}</div>
-      <div class="chart_nums_blue">{{ car.toplivo.ostatok_na_tekushchii_moment|floatformat:"0" }}</div>
+      <div class="chart_nums_red">{{ obj.tekushchaya_nagruzka|floatformat:"0" }}</div>
+      <div class="chart_nums_green">{{ obj.kolichestvo_reisov|floatformat:"0" }}</div>
+      <div class="chart_nums_blue">{{ obj.ostatok_na_tekushchii_moment|floatformat:"0" }}</div>
     </div>
   </div>
   <div class="product-cell">
-    <span>{{ car.probeg.probeg_za_period|floatformat:2 }} км.</span>
+    <span>{{ obj.probeg_za_period|floatformat:2 }} км.</span>
   </div>
   <div class="product-cell">
-    <span>{{ car.toplivo.raskhod_za_period|floatformat:2 }} литров</span>
+    <span>{{ obj.raskhod_za_period|floatformat:2 }} литров</span>
   </div>
   <div class="product-cell">
-    <span>{{ car.probeg.kolichestvo_reisov|floatformat:2 }} рейсов</span>
+    <span>{{ obj.kolichestvo_reisov|floatformat:2 }} рейсов</span>
   </div>
   <div class="product-cell">
-    <span>{{ car.datchik_vesa.summarnii_ves_za_period|floatformat:2 }} тонн</span>
+    <span>{{ obj.summarnii_ves_za_period|floatformat:2 }} тонн</span>
   </div>
   <div class="product-cell">
-    <span>{{ car.toplivo.raskhod_privedennii_g_t_km_za_period|floatformat:2 }} г/т/км</span>
+    <span>{{ obj.raskhod_privedennii_g_t_km_za_period|floatformat:2 }} г/т/км</span>
   </div>
 </div>
 <div class="details" style="display: none;">Дополнительная информация о автомобиле</div>

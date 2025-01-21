@@ -1,93 +1,92 @@
 import random
-from django.utils import timezone
+from datetime import datetime, time, timedelta
+
 from django.core.management.base import BaseCommand
-from cars.models import Cars, Toplivo, DatchikVesa, Probeg, Vremya, Shini
 from django.contrib.auth.models import User
+from cars.models import Cars, DailyData  # Импортируем новые модели
+
 
 class Command(BaseCommand):
-    help = 'Создает или обновляет данные для 15 машин и связанных таблиц за последние 90 дней'
+    help = 'Создает или обновляет тестовые данные'
 
     def handle(self, *args, **kwargs):
-        # Создаем или получаем тестового пользователя
-        user, created = User.objects.get_or_create(username='test')
-        if created:
-            user.set_password('test')
-            user.save()
+        # Количество машин и дней для создания данных
+        num_cars = 15  # Количество машин
+        num_days = 30  # Количество дней
 
-        # Создаем или обновляем 15 машин с id_car от 00001 до 00015
-        for i in range(1, 1):
+        # Создаем или получаем тестового пользователя
+        user, user_created = User.objects.get_or_create(username='test')
+        if user_created:
+            self.stdout.write(
+                self.style.SUCCESS('Пользователь "test" создан.')
+            )
+
+        # Создаем тестовые данные для машин
+        for i in range(1, num_cars + 1):
             id_car = f"{i:05d}"  # Форматируем id_car с ведущими нулями
 
             # Получаем или создаем машину
             car, car_created = Cars.objects.get_or_create(id_car=id_car)
-            car.account_name.add(user)  # Связываем машину с тестовым пользователем
+            car.account_name.add(user)  # Связываем машину с пользователем
 
-            # Создаем или обновляем данные за последние 90 дней
-            for day in range(3):
+            # Создаем данные за последние `num_days` дней
+            for day in range(num_days):
                 # Получаем дату с 0:00
-                start_of_day = timezone.now().date() - timezone.timedelta(days=day)
-                start_of_day = timezone.datetime.combine(start_of_day, timezone.datetime.min.time())
-    
-                # Получаем дату с 23:59
-                end_of_day = start_of_day + timezone.timedelta(days=1) - timezone.timedelta(seconds=1)
-                print(f"День {day}: {start_of_day} до {end_of_day}")
-
-                # Создаем данные для Toplivo
-                toplivo = Toplivo.objects.create(
-                    dt=dt,
-                    ostatok_na_tekushchii_moment=random.uniform(1, 100),
-                    raskhod_za_period=random.uniform(1, 100),
-                    raskhod_za_poezdku=random.uniform(1, 100),
-                    raskhod_na_khkh_za_period=random.uniform(1, 100),
-                    raskhod_pod_nagruzkoi_za_period=random.uniform(1, 100),
-                    raskhod_v_puti_za_period=random.uniform(1, 100),
-                    raskhod_privedennii_g_t_km_za_period=random.uniform(1, 100),
-                    raskhod_privedennii_g_t_km_obshchii=random.uniform(1, 100),
+                current_date = datetime.now().date() - timedelta(days=day)
+                target_day = datetime.combine(current_date, time.min)
+                self.stdout.write(
+                    self.style.NOTICE(f'Target day: {target_day}.')
                 )
-                car.toplivo = toplivo  # Связываем с машиной
 
-                # Создаем данные для DatchikVesa
-                datchik_vesa = DatchikVesa.objects.create(
-                    dt=dt,
-                    tekushchaya_nagruzka=random.uniform(1, 100),
-                    summarnii_ves_za_period=random.uniform(1, 100),
-                    min_ves_za_period=random.uniform(1, 100),
-                    max_ves_za_period=random.uniform(1, 100),
-                    srednii_ves_reisa_za_period=random.uniform(1, 100),
+                # Создаем или получаем объект DailyData
+                daily_data, created = DailyData.objects.get_or_create(
+                    car=car,
+                    dt=target_day,
+                    defaults={
+                        # Топливо
+                        'ostatok_na_tekushchii_moment': random.uniform(1, 100),
+                        'raskhod_za_period': random.uniform(1, 100),
+                        'raskhod_za_poezdku': random.uniform(1, 100),
+                        'raskhod_na_khkh_za_period': random.uniform(1, 100),
+                        'raskhod_pod_nagruzkoi_za_period': random.uniform(1, 100),
+                        'raskhod_v_puti_za_period': random.uniform(1, 100),
+                        'raskhod_privedennii_g_t_km_za_period': random.uniform(1, 100),
+                        'raskhod_privedennii_g_t_km_obshchii': random.uniform(1, 100),
+
+                        # Датчик веса
+                        'tekushchaya_nagruzka': random.uniform(1, 100),
+                        'summarnii_ves_za_period': random.uniform(1, 100),
+                        'min_ves_za_period': random.uniform(1, 100),
+                        'max_ves_za_period': random.uniform(1, 100),
+                        'srednii_ves_reisa_za_period': random.uniform(1, 100),
+
+                        # Пробег
+                        'probeg_na_segodnya': random.uniform(1, 100),
+                        'probeg_za_period': random.uniform(1, 100),
+                        'kolichestvo_reisov': random.uniform(1, 100),
+                        'kolichestvo_poezdok_za_period': random.uniform(1, 100),
+
+                        # Время
+                        'vremya_s_nachala_perioda': random.uniform(1, 100),
+                        'vremya_raboty_dvigatelya_za_period': random.uniform(1, 100),
+                        'vremya_hkh_za_period': random.uniform(1, 100),
+                        'motochasy_obshchie': random.uniform(1, 100),
+                        'motochasy_za_period': random.uniform(1, 100),
+
+                        # Шины
+                        'davlenie_v_shinah': random.uniform(1, 100),
+                    }
                 )
-                car.datchik_vesa = datchik_vesa  # Связываем с машиной
 
-                # Создаем данные для Probeg
-                probeg = Probeg.objects.create(
-                    dt=dt,
-                    probeg_na_segodnya=random.uniform(1, 100),
-                    probeg_za_period=random.uniform(1, 100),
-                    kolichestvo_reisov=random.uniform(1, 100),
-                    kolichestvo_poezdok_za_period=random.uniform(1, 100),
-                )
-                car.probeg = probeg  # Связываем с машиной
-
-                # Создаем данные для Vremya
-                vremya = Vremya.objects.create(
-                    dt=dt,
-                    vremya_s_nachala_perioda=random.uniform(1, 100),
-                    vremya_raboty_dvigatelya_za_period=random.uniform(1, 100),
-                    vremya_hkh_za_period=random.uniform(1, 100),
-                    motochasy_obshchie=random.uniform(1, 100),
-                    motochasy_za_period=random.uniform(1, 100),
-                )
-                car.vremya = vremya  # Связываем с машиной
-
-                # Создаем данные для Shini
-                shini = Shini.objects.create(
-                    dt=dt,
-                    davlenie_v_shinah=random.uniform(1, 100),
-                )
-                car.shini = shini  # Связываем с машиной
-
-                # Сохраняем изменения в машине
-                car.save()
+                if created:
+                    self.stdout.write(
+                        self.style.SUCCESS(f'Данные для машины {car.id_car} на {target_day} созданы.')
+                    )
+                else:
+                    self.stdout.write(
+                        self.style.WARNING(f'Данные для машины {car.id_car} на {target_day} уже существуют.')
+                    )
 
         self.stdout.write(
-            self.style.SUCCESS('Данные успешно созданы или обновлены.')
+            self.style.SUCCESS('Тестовые данные успешно созданы или обновлены.')
         )

@@ -3,6 +3,7 @@ import logging
 
 from datetime import timedelta
 
+from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.contrib.auth import (
     login as auth_login,
@@ -10,71 +11,72 @@ from django.contrib.auth import (
 )
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Prefetch, Q
-from django.views.decorators.cache import cache_page
+# from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator
-from django.utils import timezone
+from django.db.models import Sum
 
 from cars.models import (
     Jsession,
     User,
     UserPassword,
-    Cars,
-    Toplivo,
-    DatchikVesa,
-    Vremya,
-    Probeg,
-    Shini,
+    DailyData,
 )
+from cars.utils import encrypt_password
 from cars.constants import URL_GET_JSESSION
-from cars.utils import (
-    get_tech,
-    get_fuel_and_mileage,
-    get_weight,
-    encrypt_password,
-)
 
 
 logging.basicConfig(level=logging.INFO)
 
 
-def check_auth(request):
-    pass
-    
-
 @login_required
-def car_list_today(request):
+def car_list(request):
     user = request.user
     logging.info(f"User: {user}")
-    try:
-        jsession_obj = Jsession.objects.get(user=user)
-        jsession = jsession_obj.jsession
-    except Jsession.DoesNotExist:
+    if not Jsession.objects.get(user=user):
         messages.error(request, "Ошибка авторизации")
         return redirect('login')
 
-    # Определяем диапазон дат для "сегодня"
-    now = timezone.now()
-    start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    end_date = now
+    # По умолчанию фильтруем за сегодня
+    period = request.GET.get('period', 'today')
+    # Сегодняшняя дата
+    today = timezone.now().date()
+    if period == "today":
+        daily_data = DailyData.objects.filter(dt__date=today)
+    if period == 'yesterday':
+        # Вчерашняя дата
+        target_date = today - timedelta(days=1)
+        daily_data = DailyData.objects.filter(dt__date=target_date)
+    if period == '7days':
+        start_date = today - timedelta(days=7)
+        daily_data = DailyData.objects.filter(dt__date__range=[start_date, today])
+        # Агрегируем данные (например, суммируем показатели)
+        daily_data = daily_data.values('car').annotate(
+            raskhod_za_period=Sum('raskhod_za_period'),
+            probeg_za_period=Sum('probeg_za_period'),
+            tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
+            kolichestvo_reisov=Sum("kolichestvo_reisov"),
+            ostatok_na_tekushchii_moment=Sum("ostatok_na_tekushchii_moment"),
+            summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
+            raskhod_privedennii_g_t_km_za_period=Sum("raskhod_privedennii_g_t_km_za_period"),
+        )
+    if period == '30days':
+        start_date = today - timedelta(days=30)
+        daily_data = DailyData.objects.filter(dt__date__range=[start_date, today])
+        # Агрегируем данные (например, суммируем показатели)
+        daily_data = daily_data.values('car').annotate(
+            raskhod_za_period=Sum('raskhod_za_period'),
+            probeg_za_period=Sum('probeg_za_period'),
+            tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
+            kolichestvo_reisov=Sum("kolichestvo_reisov"),
+            ostatok_na_tekushchii_moment=Sum("ostatok_na_tekushchii_moment"),
+            summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
+            raskhod_privedennii_g_t_km_za_period=Sum("raskhod_privedennii_g_t_km_za_period"),
+        )
 
-    # Загружаем данные из Cars и связанные модели
-    cars = Cars.objects.all().order_by('id').prefetch_related(
-        Prefetch('toplivo', queryset=Toplivo.objects.all()),
-        Prefetch('datchik_vesa', queryset=DatchikVesa.objects.all()),
-        Prefetch('probeg', queryset=Probeg.objects.all()),
-        Prefetch('vremya', queryset=Vremya.objects.all()),
-        Prefetch('shini', queryset=Shini.objects.all())
-    )
-
-    # Фильтрация по периоду "сегодня"
-    cars = cars.filter(dt__range=(start_date, end_date)).distinct()
-
-    logging.info(f"Дата фильтрации: start_date: {start_date}, end_date: {end_date}")
-    logging.info(f"Количество машин за сегодня: {cars.count()}")
+    logging.info(f"Cars today: {daily_data.count()}")
 
     # Пагинация
-    paginator = Paginator(cars, 5)
+    paginator = Paginator(daily_data, 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -84,100 +86,9 @@ def car_list_today(request):
         {
             "page_obj": page_obj,
             "user": user,
-            "period": "today",  # Передаем период в шаблон для отображения
+            "period": period,
         }
     )
-
-
-@login_required
-def car_list_yesterday(request):
-    user = request.user
-    logging.info(f"User: {user}")
-    try:
-        jsession_obj = Jsession.objects.get(user=user)
-        jsession = jsession_obj.jsession
-    except Jsession.DoesNotExist:
-        messages.error(request, "Ошибка авторизации")
-        return redirect('login')
-
-    # Определяем диапазон дат для "вчера"
-    now = timezone.now()
-    start_date = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-    end_date = start_date + timedelta(days=1)
-
-    # Загружаем данные из Cars и связанные модели
-    cars = Cars.objects.all().order_by('id').prefetch_related(
-        Prefetch('toplivo', queryset=Toplivo.objects.filter(lt__range=(start_date, end_date))),
-        Prefetch('datchik_vesa', queryset=DatchikVesa.objects.filter(lt__range=(start_date, end_date))),
-        Prefetch('probeg', queryset=Probeg.objects.filter(lt__range=(start_date, end_date))),
-        Prefetch('vremya', queryset=Vremya.objects.filter(lt__range=(start_date, end_date))),
-        Prefetch('shini', queryset=Shini.objects.filter(lt__range=(start_date, end_date))),
-    )
-
-    logging.info(f"Дата фильтрации: start_date: {start_date}, end_date: {end_date}")
-    logging.info(f"Количество машин за вчера: {cars.count()}")
-
-    # Пагинация
-    paginator = Paginator(cars, 5)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    return render(
-        request,
-        "cars/index.html",
-        {
-            "page_obj": page_obj,
-            "user": user,
-            "period": "yesterday",  # Передаем период в шаблон для отображения
-        }
-    )
-
-
-# @cache_page(60 * 15)
-# @login_required
-# def car_list(request):
-#     user = request.user
-#     try:
-#         jsession_obj = Jsession.objects.get(user=user)
-#         jsession = jsession_obj.jsession
-#     except Jsession.DoesNotExist:
-#         messages.error(request, "Ошибка авторизации")
-#         return redirect('login')
-
-#     # Получаем технику
-#     devidno = get_tech(jsession)
-#     logging.info(f"Это devidno {devidno}")
-#     if devidno is False:
-#         logging.info("Не получили технику")
-#         messages.error(request, "Время сессии истекло")
-#         return redirect('login')
-
-#     # Получаю топливо и пробег
-#     result = get_fuel_and_mileage(jsession, devidno)
-#     if result is False:
-#         logging.info("Не получили топливо или пробег")
-#         messages.error(request, "Время сессии истекло")
-#         return redirect('login')
-
-#     fuel_yl, mileage_lc = result
-#     logging.info(f"Это fuel_yl {fuel_yl}")
-#     logging.info(f"Это mileage_lc {mileage_lc}")
-
-#     # Получаем вес
-#     weight_p2 = get_weight(jsession, devidno)
-#     # Создаем страницы
-#     combined_data = zip(devidno, mileage_lc, fuel_yl, weight_p2)
-#     paginator = Paginator(list(combined_data), 5)
-#     page_number = request.GET.get("page")
-#     page_obj = paginator.get_page(page_number)
-#     return render(
-#         request,
-#         "cars/index.html",
-#         {
-#             "page_obj": page_obj,
-#             "user": user,
-#         }
-#     )
 
 
 def login_view(request):
@@ -224,7 +135,7 @@ def login_view(request):
         defaults={'jsession': data["jsession"]}
     )
     auth_login(request, user)
-    return redirect('car_list_today')
+    return redirect('car_list')
 
 
 def logout_view(request):
