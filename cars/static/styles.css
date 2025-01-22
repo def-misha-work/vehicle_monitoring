@@ -675,6 +675,13 @@ body {
 .chart_nums_blue {
   color: #1ad5de;
 }
+/* текст внутри выпадашки */
+.in_cell {
+  text-align: left !important;
+  padding-left: 10px !important;
+  width: 100% !important; /* Занять всю ширину родителя */
+  margin-bottom: 5px !important;
+}
 
 .details {
   overflow: hidden;

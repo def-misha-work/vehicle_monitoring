@@ -1,6 +1,14 @@
 ﻿{% for obj in page_obj %}    
 <div class="products-row" onclick="toggleDetails(this)">
-  <div class="product-cell"><span>{{ obj.car.id_car }}</span></div>
+  <div class="product-cell">
+    <span>
+      {% if period == 'today' or period == 'yesterday' %}
+          {{ obj.car.id_car }}
+        {% elif period == '7days' or period == '30days' %}
+          {{ obj.car_name }}
+      {% endif %}
+    </span>
+  </div>
   <div class="product-cell product-cell-row">
     <div class="chart">
       <div class="one">{{ obj.tekushchaya_nagruzka|floatformat:"0" }}</div>
@@ -8,13 +16,16 @@
       <div class="three">{{ obj.ostatok_na_tekushchii_moment|floatformat:"0" }}</div>
     </div>
     <div class="chart_nums">
+      {% if period == 'today' and time_since_start %}
+        <div class="time-since-start">{{ time_since_start }}</div>
+      {% endif %}
       <div class="chart_nums_red">{{ obj.tekushchaya_nagruzka|floatformat:"0" }}</div>
       <div class="chart_nums_green">{{ obj.kolichestvo_reisov|floatformat:"0" }}</div>
       <div class="chart_nums_blue">{{ obj.ostatok_na_tekushchii_moment|floatformat:"0" }}</div>
     </div>
   </div>
   <div class="product-cell">
-    <span>{{ obj.probeg_za_period|floatformat:2 }} км.</span>
+    <a>{{ obj.probeg_za_period|floatformat:2 }} км.</a>
   </div>
   <div class="product-cell">
     <span>{{ obj.raskhod_za_period|floatformat:2 }} литров</span>
@@ -29,24 +40,45 @@
     <span>{{ obj.raskhod_privedennii_g_t_km_za_period|floatformat:2 }} г/т/км</span>
   </div>
 </div>
-<div class="details" style="display: none;">Дополнительная информация о автомобиле</div>
+<div class="details" style="display: none;">
+  <div class="product-cell">
+    <div>-</div>
+  </div>
+  <div class="product-cell">
+    <div>-</div>
+  </div>
+  <div class="product-cell">
+    <div class="in_cell">
+      <div>Поездок за период: {{ obj.kolichestvo_poezdok_za_period|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="product-cell">
+    <div class="in_cell">
+      <div>За поездку: {{ obj.raskhod_za_poezdku|floatformat:2 }}</div>
+      <div>На хх за период: {{ obj.raskhod_na_khkh_za_period|floatformat:2 }}.</div>
+      <div>Под нагрузкой: {{ obj.raskhod_pod_nagruzkoi_za_period|floatformat:2 }}.</div>
+      <div>В пути: нет данных</div>
+      <div>Заправки: нет данных</div>
+    </div>
+  </div>
+  <div class="product-cell">
+    <div class="in_cell">
+      <div>Min рейсов: нет данных</div>
+      <div>Max рейсов: нет данных</div>
+      <div>Среднее кол-во: {{ obj.kolichestvo_poezdok_za_period|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="product-cell">
+    <div class="in_cell">
+      <div>Min вес: {{ obj.min_ves_za_period|floatformat:2 }}</div>
+      <div>Max вес: {{ obj.max_ves_za_period|floatformat:2 }}</div>
+      <div>Средний: {{ obj.srednii_ves_reisa_za_period|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="product-cell">
+    <div>-</div>
+  </div>
+</div>
 {% endfor %}
 
-<div class="pagination">
-  <span class="step-links">
-      {% if page_obj.has_previous %}
-          <a href="?page=1">&laquo; Первая</a>
-          <a href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
-      {% endif %}
-
-      <span class="current">
-          Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
-      </span>
-
-      {% if page_obj.has_next %}
-          <a href="?page={{ page_obj.next_page_number }}">Следующая</a>
-          <a href="?page={{ page_obj.paginator.num_pages }}">Последняя &raquo;</a>
-      {% endif %}
-  </span>
-</div>
-
+{% include 'includes/paginator/paginator.html' %}

@@ -1,7 +1,7 @@
 import requests
 import logging
 
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 from django.utils import timezone
 from django.shortcuts import render, redirect
@@ -13,7 +13,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 # from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator
-from django.db.models import Sum
+from django.db.models import Sum, F
 
 from cars.models import (
     Jsession,
@@ -51,6 +51,7 @@ def car_list(request):
         daily_data = DailyData.objects.filter(dt__date__range=[start_date, today])
         # Агрегируем данные (например, суммируем показатели)
         daily_data = daily_data.values('car').annotate(
+            car_name=F('car__id_car'),
             raskhod_za_period=Sum('raskhod_za_period'),
             probeg_za_period=Sum('probeg_za_period'),
             tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
@@ -64,6 +65,7 @@ def car_list(request):
         daily_data = DailyData.objects.filter(dt__date__range=[start_date, today])
         # Агрегируем данные (например, суммируем показатели)
         daily_data = daily_data.values('car').annotate(
+            car_name=F('car__id_car'),
             raskhod_za_period=Sum('raskhod_za_period'),
             probeg_za_period=Sum('probeg_za_period'),
             tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
@@ -80,6 +82,18 @@ def car_list(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
+    # Дата для диаграммы
+    start_of_day = timezone.make_aware(datetime.combine(today, time.min))
+    time_since_start_of_day = timezone.now() - start_of_day
+    hours, remainder = divmod(time_since_start_of_day.seconds, 3600)
+    minutes, _ = divmod(remainder, 60)
+    time_since_start = f"{hours:02}:{minutes:02}"
+
+    # Передаем параметры GET-запроса в контекст
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        del get_params['page']  # Удаляем параметр 'page', чтобы он не дублировался
+
     return render(
         request,
         "cars/index.html",
@@ -87,6 +101,8 @@ def car_list(request):
             "page_obj": page_obj,
             "user": user,
             "period": period,
+            'time_since_start': time_since_start,
+            'get_params': get_params.urlencode(),
         }
     )
 
