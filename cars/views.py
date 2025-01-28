@@ -2,6 +2,7 @@ import requests
 import logging
 
 from datetime import datetime, time, timedelta
+from collections import defaultdict
 
 from django.utils import timezone
 from django.shortcuts import render, redirect
@@ -13,7 +14,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 # from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Subquery, OuterRef
 
 from cars.models import (
     Jsession,
@@ -40,42 +41,114 @@ def car_list(request):
     period = request.GET.get('period', 'today')
     # Сегодняшняя дата
     today = timezone.now().date()
+
+    # Подзапрос для получения последнего значения ostatok_na_tekushchii_moment
+    last_ostatok_subquery = DailyData.objects.filter(
+        car=OuterRef('car'),
+        dt__date=OuterRef('dt__date')
+    ).order_by('-dt').values('ostatok_na_tekushchii_moment')[:1]
+
+    result = defaultdict(lambda: {
+        'raskhod_za_period': 0,
+        'probeg_za_period': 0,
+        'tekushchaya_nagruzka': 0,
+        'kolichestvo_reisov': 0,
+        'summarnii_ves_za_period': 0,
+        'raskhod_privedennii_g_t_km_za_period': 0,
+        'ostatok_na_tekushchii_moment': None
+    })
+
     if period == "today":
-        daily_data = DailyData.objects.filter(dt__date=today)
-    if period == 'yesterday':
-        # Вчерашняя дата
-        target_date = today - timedelta(days=1)
-        daily_data = DailyData.objects.filter(dt__date=target_date)
-    if period == '7days':
-        start_date = today - timedelta(days=7)
-        daily_data = DailyData.objects.filter(dt__date__range=[start_date, today])
-        # Агрегируем данные (например, суммируем показатели)
-        daily_data = daily_data.values('car').annotate(
+        daily_data = DailyData.objects.filter(dt__date=today).values('car').annotate(
             car_name=F('car__id_car'),
             raskhod_za_period=Sum('raskhod_za_period'),
             probeg_za_period=Sum('probeg_za_period'),
             tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
             kolichestvo_reisov=Sum("kolichestvo_reisov"),
-            ostatok_na_tekushchii_moment=Sum("ostatok_na_tekushchii_moment"),
             summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
-            raskhod_privedennii_g_t_km_za_period=Sum("raskhod_privedennii_g_t_km_za_period"),
-        )
-    if period == '30days':
-        start_date = today - timedelta(days=30)
-        daily_data = DailyData.objects.filter(dt__date__range=[start_date, today])
-        # Агрегируем данные (например, суммируем показатели)
-        daily_data = daily_data.values('car').annotate(
-            car_name=F('car__id_car'),
-            raskhod_za_period=Sum('raskhod_za_period'),
-            probeg_za_period=Sum('probeg_za_period'),
-            tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
-            kolichestvo_reisov=Sum("kolichestvo_reisov"),
-            ostatok_na_tekushchii_moment=Sum("ostatok_na_tekushchii_moment"),
-            summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
-            raskhod_privedennii_g_t_km_za_period=Sum("raskhod_privedennii_g_t_km_za_period"),
+            raskhod_privedennii_g_t_km_za_period=Sum(
+                "raskhod_privedennii_g_t_km_za_period"
+            ),
+            ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery)
         )
 
-    logging.info(f"Cars today: {daily_data.count()}")
+    if period == 'yesterday':
+        # Вчерашняя дата
+        yesterday = today - timedelta(days=1)
+        daily_data = DailyData.objects.filter(dt__date=yesterday).values('car').annotate(
+            car_name=F('car__id_car'),
+            raskhod_za_period=Sum('raskhod_za_period'),
+            probeg_za_period=Sum('probeg_za_period'),
+            tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
+            kolichestvo_reisov=Sum("kolichestvo_reisov"),
+            summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
+            raskhod_privedennii_g_t_km_za_period=Sum(
+                "raskhod_privedennii_g_t_km_za_period"
+            ),
+            ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery)
+        )
+
+    if period == '7days':
+        date_7 = today - timedelta(days=6)
+        daily_data = DailyData.objects.filter(dt__gte=date_7).values('car').annotate(
+            car_name=F('car__id_car'),
+            raskhod_za_period=Sum('raskhod_za_period'),
+            probeg_za_period=Sum('probeg_za_period'),
+            tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
+            kolichestvo_reisov=Sum("kolichestvo_reisov"),
+            summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
+            raskhod_privedennii_g_t_km_za_period=Sum(
+                "raskhod_privedennii_g_t_km_za_period"
+            ),
+            ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery)
+        )
+        for entry in daily_data:
+            car_id = entry['car']
+            result[car_id]['raskhod_za_period'] += entry['raskhod_za_period']
+            result[car_id]['probeg_za_period'] += entry['probeg_za_period']
+            result[car_id]['tekushchaya_nagruzka'] += entry['tekushchaya_nagruzka']
+            result[car_id]['kolichestvo_reisov'] += entry['kolichestvo_reisov']
+            result[car_id]['summarnii_ves_za_period'] += entry['summarnii_ves_za_period']
+            result[car_id]['raskhod_privedennii_g_t_km_za_period'] += entry['raskhod_privedennii_g_t_km_za_period']
+            # Обновляем значение ostatok_na_tekushchii_moment из последнего элемента
+            result[car_id]['ostatok_na_tekushchii_moment'] = entry['ostatok_na_tekushchii_moment']
+
+        # Преобразуем defaultdict в обычный словарь
+        final_result = {car_id: {**values, 'car_name': entry['car_name']} for car_id, values in result.items() for entry in daily_data if entry['car'] == car_id}
+        daily_data = [{**values, 'car': car_id} for car_id, values in final_result.items()]
+        # print(daily_data)
+
+    if period == '30days':
+        start_date = today - timedelta(days=29)
+        daily_data = DailyData.objects.filter(dt__date__range=[start_date, today]).values('car').annotate(
+            car_name=F('car__id_car'),
+            raskhod_za_period=Sum('raskhod_za_period'),
+            probeg_za_period=Sum('probeg_za_period'),
+            tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
+            kolichestvo_reisov=Sum("kolichestvo_reisov"),
+            summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
+            raskhod_privedennii_g_t_km_za_period=Sum(
+                "raskhod_privedennii_g_t_km_za_period"
+            ),
+            ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery)
+        ).distinct()
+
+
+    # Агрегируем данные (например, суммируем показатели)
+    # daily_data = daily_data.values('car').annotate(
+    #     car_name=F('car__id_car'),
+    #     raskhod_za_period=Sum('raskhod_za_period'),
+    #     probeg_za_period=Sum('probeg_za_period'),
+    #     tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
+    #     kolichestvo_reisov=Sum("kolichestvo_reisov"),
+    #     summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
+    #     raskhod_privedennii_g_t_km_za_period=Sum(
+    #         "raskhod_privedennii_g_t_km_za_period"
+    #     ),
+    #     ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery)
+    # )
+
+    # logging.info(f"Cars today: {daily_data.count()}")
 
     # Пагинация
     paginator = Paginator(daily_data, 5)
@@ -92,7 +165,8 @@ def car_list(request):
     # Передаем параметры GET-запроса в контекст
     get_params = request.GET.copy()
     if 'page' in get_params:
-        del get_params['page']  # Удаляем параметр 'page', чтобы он не дублировался
+        # Удаляем параметр 'page', чтобы он не дублировался
+        del get_params['page']
 
     return render(
         request,

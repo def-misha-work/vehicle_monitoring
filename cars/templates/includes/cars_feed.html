@@ -2,11 +2,7 @@
 <div class="products-row" onclick="toggleDetails(this)">
   <div class="product-cell">
     <span>
-      {% if period == 'today' or period == 'yesterday' %}
-          {{ obj.car.id_car }}
-        {% elif period == '7days' or period == '30days' %}
-          {{ obj.car_name }}
-      {% endif %}
+      {{ obj.car_name }}
     </span>
   </div>
   <div class="product-cell product-cell-row">
