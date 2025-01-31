@@ -11,8 +11,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # Количество машин и дней для создания данных
-        num_cars = 1  # Количество машин
-        num_days = 7  # Количество дней
+        num_cars = 3  # Количество машин
+        num_days = 30  # Количество дней
 
         # Создаем или получаем тестового пользователя
         user, user_created = User.objects.get_or_create(username='test')
