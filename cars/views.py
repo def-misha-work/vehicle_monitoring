@@ -16,18 +16,47 @@ from django.core.paginator import Paginator
 from django.db.models import (
     Sum, Subquery, OuterRef, Avg, Min,
 )
-
+from cars.forms import TimePeriodForm, PlanPeriodForm
 from cars.models import (
     Jsession,
     User,
     UserPassword,
     DailyData,
+    TimePeriod
 )
 from cars.utils import encrypt_password
 from cars.constants import URL_GET_JSESSION
 
 
 logging.basicConfig(level=logging.INFO)
+
+
+@login_required
+def set_time_period(request):
+    if request.method == 'POST':
+        form = TimePeriodForm(request.POST)
+        if form.is_valid():
+            time_period = form.save(commit=False)
+            time_period.account_name = request.user
+            time_period.save()
+            return redirect('car_list')
+    else:
+        form = TimePeriodForm()
+    return render(request, 'cars/set_time_period.html', {'form': form})
+
+
+@login_required
+def set_plan_period(request):
+    if request.method == 'POST':
+        form = PlanPeriodForm(request.POST)
+        if form.is_valid():
+            plan_period = form.save(commit=False)
+            plan_period.account_name = request.user
+            plan_period.save()
+            return redirect('car_list')
+    else:
+        form = PlanPeriodForm()
+    return render(request, 'cars/set_plan_period.html', {'form': form})
 
 
 @login_required
@@ -40,7 +69,7 @@ def car_list(request):
 
     # По умолчанию фильтруем за сегодня
     period = request.GET.get("period", "today")
-    # Сегодняшняя дата
+    time_period = TimePeriod.objects.filter(account_name=user).order_by('-id').first()
     today = timezone.now().date()
 
     # Подзапрос для получения последнего значения ostatok_na_tekushchii_moment
@@ -48,6 +77,33 @@ def car_list(request):
         car=OuterRef("car"),
         dt__date=OuterRef("dt__date")
     ).order_by("-dt").values("ostatok_na_tekushchii_moment")[:1]
+
+    if period == "smena":
+        start_time = timezone.datetime.combine(today, time(9, 0))
+        end_time = timezone.datetime.combine(today, time(18, 0))
+        if time_period:
+            start_time = time_period.start_time
+            end_time = time_period.end_time
+
+        daily_data = DailyData.objects.filter(
+            dt__range=[start_time, end_time]
+        ).values('car__id_car').annotate(
+            raskhod_za_period=Sum("raskhod_za_period"),
+            probeg_za_period=Sum("probeg_za_period"),
+            tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
+            kolichestvo_reisov=Sum("kolichestvo_reisov"),
+            summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
+            raskhod_privedennii_g_t_km_za_period=Sum("raskhod_privedennii_g_t_km_za_period"),
+            ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery),
+            sum_kolichestvo_poezdok_za_period=Sum("kolichestvo_poezdok_za_period"),
+            raskhod_za_poezdku=Sum("raskhod_za_poezdku"),
+            raskhod_na_khkh_za_period=Sum("raskhod_na_khkh_za_period"),
+            raskhod_pod_nagruzkoi_za_period=Sum("raskhod_pod_nagruzkoi_za_period"),
+            avg_kolichestvo_poezdok_za_period=Avg("kolichestvo_poezdok_za_period"),
+            min_ves_za_period=Min("min_ves_za_period"),
+            max_ves_za_period=Min("max_ves_za_period"),
+            avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
+        )
 
     if period == "today":
         daily_data = DailyData.objects.filter(dt__date=today).values("car__id_car").annotate(

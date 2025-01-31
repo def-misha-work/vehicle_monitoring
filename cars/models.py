@@ -25,6 +25,31 @@ class Jsession(models.Model):
         return f"jsession: {self.jsession}"
 
 
+class PlanPeriod(models.Model):
+    account_name = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    plan_reisov = models.IntegerField(verbose_name="План по рейсам")
+    plan_ves_za_period = models.IntegerField(verbose_name="План по тоннам (весу)")
+
+
+class TimePeriod(models.Model):
+    account_name = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    start_time = models.DateTimeField(verbose_name="Время начала")
+    end_time = models.DateTimeField(verbose_name="Время окончания")
+
+    class Meta:
+        verbose_name = "Смена"
+
+    def __str__(self):
+        return (
+            f"Промежуток {self.start_time} - {self.end_time}"
+            f" для {self.user.username}"
+        )
+
+
 class Cars(models.Model):
     id_car = models.CharField(
         max_length=255,

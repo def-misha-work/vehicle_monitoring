@@ -7,7 +7,7 @@
   </div>
   <div class="product-cell product-cell-row">
     <div class="chart">
-      {% if period == 'today' or period == 'yesterday' %}
+      {% if period == 'today' or period == 'yesterday' or period == 'smena' %}
       <div class="one">{{ obj.tekushchaya_nagruzka|floatformat:"0" }}</div>
       <div class="two">{{ obj.kolichestvo_reisov|floatformat:"0" }}</div>
       <div class="three">{{ obj.ostatok_na_tekushchii_moment|floatformat:"0" }}</div>
@@ -17,7 +17,7 @@
       {% if period == 'today' and time_since_start %}
         <div class="time-since-start">{{ time_since_start }}</div>
       {% endif %}
-      {% if period == 'today' or period == 'yesterday' %}
+      {% if period == 'today' or period == 'yesterday' or period == 'smena' %}
       <div class="chart_nums_red">{{ obj.tekushchaya_nagruzka|floatformat:"0" }}</div>
       <div class="chart_nums_green">{{ obj.kolichestvo_reisov|floatformat:"0" }}</div>
       <div class="chart_nums_blue">{{ obj.ostatok_na_tekushchii_moment|floatformat:"0" }}</div>
