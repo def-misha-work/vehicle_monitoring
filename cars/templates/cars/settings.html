@@ -20,12 +20,12 @@
     <form method="post" class="settings-form">
       {% csrf_token %}
       <div class="form-group">
-        <label for="{{ form_plan.field_name.id_for_label }}">Поле 1</label>
-        {{ form_plan.field_name }}
+        <label for="{{ form_plan.field_name.id_for_label }}">План по рейсам: {{ plan.plan_reisov }}</label>
+        {{ form_plan.plan_reisov }}
       </div>
       <div class="form-group">
-        <label for="{{ form_plan.another_field.id_for_label }}">Поле 2</label>
-        {{ form_plan.another_field }}
+        <label for="{{ form_plan.another_field.id_for_label }}">План по весу (тонны): {{ plan.plan_ves_za_period }}</label>
+        {{ form_plan.plan_ves_za_period }}
       </div>
       <button type="submit" name="submit_plan_period" class="submit-button">Сохранить</button>
     </form>
@@ -34,11 +34,11 @@
     <form method="post" class="settings-form">
       {% csrf_token %}
       <div class="form-group">
-        <label for="{{ form_time.start_time.id_for_label }}">Начало смены</label>
+        <label for="{{ form_time.start_time.id_for_label }}">Начало смены: {{ smena_period.start_time }}</label>
         {{ form_time.start_time }}
       </div>
       <div class="form-group">
-        <label for="{{ form_time.end_time.id_for_label }}">Конец смены</label>
+        <label for="{{ form_time.end_time.id_for_label }}">Конец смены: {{ smena_period.end_time }}</label>
         {{ form_time.end_time }}
       </div>
       <button type="submit" name="submit_time_period" class="submit-button">Сохранить</button>

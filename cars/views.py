@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 # from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator
 from django.db.models import (
-    Sum, Subquery, OuterRef, Avg, Min,
+    Sum, Subquery, OuterRef, Avg, Min, ExpressionWrapper, F, FloatField,
 )
 from cars.forms import TimePeriodForm, PlanPeriodForm
 from cars.models import (
@@ -22,7 +22,8 @@ from cars.models import (
     User,
     UserPassword,
     DailyData,
-    TimePeriod
+    TimePeriod,
+    PlanPeriod,
 )
 from cars.utils import encrypt_password
 from cars.constants import URL_GET_JSESSION
@@ -43,28 +44,49 @@ def settings(request):
     form_plan = PlanPeriodForm()
     form_time = TimePeriodForm()
 
+    last_plan = PlanPeriod.objects.filter(account_name=user).order_by("-id").first()
+    last_time_period = TimePeriod.objects.filter(account_name=user).order_by("-id").first()
+
     if request.method == "POST":
         if "submit_plan_period" in request.POST:
             form_plan = PlanPeriodForm(request.POST)
             if form_plan.is_valid():
-                plan_period = form_plan.save(commit=False)
-                plan_period.account_name = request.user
-                plan_period.save()
-                messages.info("План обновлен")
+                if last_plan:  # Если запись существует, обновляем её
+                    plan_period = last_plan
+                    form_plan.save(commit=False)  # Не сохраняем сразу
+                    plan_period.plan_reisov = form_plan.cleaned_data['plan_reisov']
+                    plan_period.plan_ves_za_period = form_plan.cleaned_data['plan_ves_za_period']
+                    plan_period.save()
+                else:  # Если записи нет, создаем новую
+                    plan_period = form_plan.save(commit=False)
+                    plan_period.account_name = request.user
+                    plan_period.save()
                 return redirect("settings")
+
         if "submit_time_period" in request.POST:
             form_time = TimePeriodForm(request.POST)
             if form_time.is_valid():
-                time_period = form_time.save(commit=False)
-                time_period.account_name = request.user
-                time_period.save()
-                messages.info("Смена обновлена")
+                if last_time_period:  # Если запись существует, обновляем её
+                    time_period = last_time_period
+                    form_time.save(commit=False)  # Не сохраняем сразу
+                    time_period.start_time = form_time.cleaned_data['start_time']
+                    time_period.end_time = form_time.cleaned_data['end_time']
+                    time_period.save()
+                else:  # Если записи нет, создаем новую
+                    time_period = form_time.save(commit=False)
+                    time_period.account_name = request.user
+                    time_period.save()
                 return redirect("settings")
 
     return render(
         request,
         "cars/settings.html",
-        {"form_plan": form_plan, "form_time": form_time}
+        {
+            "form_plan": form_plan,
+            "form_time": form_time,
+            "smena_period": last_time_period,
+            "plan": last_plan,
+        }
     )
 
 
@@ -78,8 +100,8 @@ def car_list(request):
 
     # По умолчанию фильтруем за сегодня
     period = request.GET.get("period", "today")
-    time_period = TimePeriod.objects.filter(account_name=user).order_by("-id").first()
     today = timezone.now().date()
+    smena_period = TimePeriod.objects.filter(account_name=user).order_by("-id").first()
 
     # Подзапрос для получения последнего значения ostatok_na_tekushchii_moment
     last_ostatok_subquery = DailyData.objects.filter(
@@ -87,12 +109,22 @@ def car_list(request):
         dt__date=OuterRef("dt__date")
     ).order_by("-dt").values("ostatok_na_tekushchii_moment")[:1]
 
+    # получаем данные для планы
+    plan = PlanPeriod.objects.filter(account_name=user).order_by("-id").first()
+    if not plan:
+        # Если план не существует, создаем его с plan_reisov = 0
+        plan = PlanPeriod.objects.create(
+            account_name=user,
+            plan_reisov=0,
+            plan_ves_za_period=0,
+        )
+
     if period == "smena":
         start_time = timezone.datetime.combine(today, time(9, 0))
         end_time = timezone.datetime.combine(today, time(18, 0))
-        if time_period:
-            start_time = time_period.start_time
-            end_time = time_period.end_time
+        if smena_period:
+            start_time = smena_period.start_time
+            end_time = smena_period.end_time
 
         daily_data = DailyData.objects.filter(
             dt__range=[start_time, end_time]
@@ -112,6 +144,14 @@ def car_list(request):
             min_ves_za_period=Min("min_ves_za_period"),
             max_ves_za_period=Min("max_ves_za_period"),
             avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
+            chart_data_kolichestvo_reisov=ExpressionWrapper(
+                F('kolichestvo_reisov') * 100.0 / plan.plan_reisov,
+                output_field=FloatField()
+            ),
+            chart_data_tekushchaya_nagruzka=ExpressionWrapper(
+                F('tekushchaya_nagruzka') * 100.0 / plan.plan_ves_za_period,
+                output_field=FloatField()
+            ),
         )
 
     if period == "today":
@@ -131,6 +171,14 @@ def car_list(request):
             min_ves_za_period=Min("min_ves_za_period"),
             max_ves_za_period=Min("max_ves_za_period"),
             avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
+            chart_data_kolichestvo_reisov=ExpressionWrapper(
+                F('kolichestvo_reisov') * 100.0 / plan.plan_reisov,
+                output_field=FloatField()
+            ),
+            chart_data_tekushchaya_nagruzka=ExpressionWrapper(
+                F('tekushchaya_nagruzka') * 100.0 / plan.plan_ves_za_period,
+                output_field=FloatField()
+            ),
         )
 
     if period == "yesterday":
@@ -142,7 +190,7 @@ def car_list(request):
             kolichestvo_reisov=Sum("kolichestvo_reisov"),
             summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
             raskhod_privedennii_g_t_km_za_period=Sum("raskhod_privedennii_g_t_km_za_period"),
-            ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery),
+            # ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery),
             sum_kolichestvo_poezdok_za_period=Sum("kolichestvo_poezdok_za_period"),
             raskhod_za_poezdku=Sum("raskhod_za_poezdku"),
             raskhod_na_khkh_za_period=Sum("raskhod_na_khkh_za_period"),
@@ -151,6 +199,14 @@ def car_list(request):
             min_ves_za_period=Min("min_ves_za_period"),
             max_ves_za_period=Min("max_ves_za_period"),
             avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
+            chart_data_kolichestvo_reisov=ExpressionWrapper(
+                F('kolichestvo_reisov') * 100.0 / plan.plan_reisov,
+                output_field=FloatField()
+            ),
+            chart_data_tekushchaya_nagruzka=ExpressionWrapper(
+                F('tekushchaya_nagruzka') * 100.0 / plan.plan_ves_za_period,
+                output_field=FloatField()
+            ),
         )
 
     if period == "7days":
@@ -220,6 +276,7 @@ def car_list(request):
             "period": period,
             "time_since_start": time_since_start,
             "get_params": get_params.urlencode(),
+            "plan": plan,
         }
     )
 

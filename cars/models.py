@@ -46,7 +46,7 @@ class TimePeriod(models.Model):
     def __str__(self):
         return (
             f"Промежуток {self.start_time} - {self.end_time}"
-            f" для {self.user.username}"
+            f" для {self.account_name}"
         )
 
 

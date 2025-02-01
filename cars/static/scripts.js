@@ -40,3 +40,39 @@ document.querySelector(".jsFilter").addEventListener("click", function () {
       });
     }
   });
+
+
+// для план/факта выделяет цветом
+document.addEventListener("DOMContentLoaded", () => {
+  const productCells = document.querySelectorAll(".product-cell");
+
+  productCells.forEach(cell => {
+      const factSpan = cell.querySelector(".fact");
+      const planSpan = cell.querySelector(".plan");
+
+      // Проверяем наличие элементов
+      if (!factSpan || !planSpan) {
+          console.warn("Не удалось найти один из span в:", cell);
+          return; // Прерываем текущую итерацию, если элементы не найдены
+      }
+
+      const factValue = parseFloat(factSpan.textContent);
+      const planValue = parseFloat(planSpan.textContent);
+
+      console.log(factValue, planValue); // Проверка значений
+
+      // Сравниваем значения
+      if (factValue < planValue) {
+          factSpan.classList.add("highlight-red");
+      } else {
+          factSpan.classList.add("highlight-green");
+      }
+
+      // Добавляем классы для планового значения
+      // if (factValue >= planValue) {
+      //     planSpan.classList.add("highlight-green");
+      // } else {
+      //     planSpan.classList.add("highlight-red");
+      // }
+  });
+});

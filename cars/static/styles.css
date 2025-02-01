@@ -842,6 +842,7 @@ body {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  margin-bottom: 20px;
 }
 
 .submit-button:hover {
@@ -852,4 +853,14 @@ body {
 .setting_field h2 {
   color: var(--app-content-main-color);
   margin-bottom: 20px;
+  text-align: center; /* Добавьте это свойство */
+}
+
+/* для план/факта */
+.highlight-red {
+  color: red;
+}
+
+.highlight-green {
+  color: green;
 }
