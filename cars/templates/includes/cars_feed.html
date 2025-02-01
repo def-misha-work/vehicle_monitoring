@@ -2,22 +2,26 @@
 <div class="products-row" onclick="toggleDetails(this)">
   <div class="product-cell">
     <span>
-      {{ obj.car_name }}
+      {{ obj.car__id_car }}
     </span>
   </div>
   <div class="product-cell product-cell-row">
     <div class="chart">
-      <div class="one">{{ obj.tekushchaya_nagruzka|floatformat:"0" }}</div>
-      <div class="two">{{ obj.kolichestvo_reisov|floatformat:"0" }}</div>
+      {% if period == 'today' or period == 'yesterday' or period == 'smena' %}
+      <div class="one">{{ obj.chart_data_tekushchaya_nagruzka|floatformat:"0" }}</div>
+      <div class="two">{{ obj.chart_data_kolichestvo_reisov|floatformat:"0" }}</div>
       <div class="three">{{ obj.ostatok_na_tekushchii_moment|floatformat:"0" }}</div>
+      {% endif %}
     </div>
     <div class="chart_nums">
       {% if period == 'today' and time_since_start %}
         <div class="time-since-start">{{ time_since_start }}</div>
       {% endif %}
-      <div class="chart_nums_red">{{ obj.tekushchaya_nagruzka|floatformat:"0" }}</div>
-      <div class="chart_nums_green">{{ obj.kolichestvo_reisov|floatformat:"0" }}</div>
+      {% if period == 'today' or period == 'yesterday' or period == 'smena' %}
+      <div class="chart_nums_red">{{ obj.chart_data_tekushchaya_nagruzka|floatformat:"0" }}</div>
+      <div class="chart_nums_green">{{ obj.chart_data_kolichestvo_reisov|floatformat:"0" }}</div>
       <div class="chart_nums_blue">{{ obj.ostatok_na_tekushchii_moment|floatformat:"0" }}</div>
+      {% endif %}
     </div>
   </div>
   <div class="product-cell">
@@ -27,10 +31,16 @@
     <span>{{ obj.raskhod_za_period|floatformat:2 }} литров</span>
   </div>
   <div class="product-cell">
-    <span>{{ obj.kolichestvo_reisov|floatformat:2 }} рейсов</span>
+    <span>Факт: <span class="fact">{{ obj.kolichestvo_reisov|floatformat:2 }}</span> рейсов</span>
+    {% if period == 'today' or period == 'yesterday' or period == 'smena' %}
+      <span>План: <span class="plan">{{ plan.plan_reisov }}</span> рейсов</span>
+    {% endif %}
   </div>
   <div class="product-cell">
-    <span>{{ obj.summarnii_ves_za_period|floatformat:2 }} тонн</span>
+    <span>Факт: <span class="fact">{{ obj.summarnii_ves_za_period|floatformat:2 }}</span> тонн</span>
+    {% if period == 'today' or period == 'yesterday' or period == 'smena' %}
+      <span>План: <span class="plan">{{ plan.plan_ves_za_period }}</span> тонн</span>
+    {% endif %}
   </div>
   <div class="product-cell">
     <span>{{ obj.raskhod_privedennii_g_t_km_za_period|floatformat:2 }} г/т/км</span>
@@ -45,14 +55,14 @@
   </div>
   <div class="product-cell">
     <div class="in_cell">
-      <div>Поездок за период: {{ obj.kolichestvo_poezdok_za_period|floatformat:2 }}</div>
+      <div>Поездок за период: {{ obj.sum_kolichestvo_poezdok_za_period|floatformat:2 }}</div>
     </div>
   </div>
   <div class="product-cell">
     <div class="in_cell">
       <div>За поездку: {{ obj.raskhod_za_poezdku|floatformat:2 }}</div>
-      <div>На хх за период: {{ obj.raskhod_na_khkh_za_period|floatformat:2 }}.</div>
-      <div>Под нагрузкой: {{ obj.raskhod_pod_nagruzkoi_za_period|floatformat:2 }}.</div>
+      <div>На хх за период: {{ obj.raskhod_na_khkh_za_period|floatformat:2 }}</div>
+      <div>Под нагрузкой: {{ obj.raskhod_pod_nagruzkoi_za_period|floatformat:2 }}</div>
       <div>В пути: нет данных</div>
       <div>Заправки: нет данных</div>
     </div>
@@ -61,14 +71,14 @@
     <div class="in_cell">
       <div>Min рейсов: нет данных</div>
       <div>Max рейсов: нет данных</div>
-      <div>Среднее кол-во: {{ obj.kolichestvo_poezdok_za_period|floatformat:2 }}</div>
+      <div>Среднее кол-во: {{ obj.avg_kolichestvo_poezdok_za_period|floatformat:2 }}</div>
     </div>
   </div>
   <div class="product-cell">
     <div class="in_cell">
       <div>Min вес: {{ obj.min_ves_za_period|floatformat:2 }}</div>
       <div>Max вес: {{ obj.max_ves_za_period|floatformat:2 }}</div>
-      <div>Средний: {{ obj.srednii_ves_reisa_za_period|floatformat:2 }}</div>
+      <div>Средний: {{ obj.avg_srednii_ves_reisa_za_period|floatformat:2 }}</div>
     </div>
   </div>
   <div class="product-cell">

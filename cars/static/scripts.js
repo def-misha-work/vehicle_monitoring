@@ -31,7 +31,48 @@ document.querySelector(".jsFilter").addEventListener("click", function () {
     document.querySelector(".products-area-wrapper").classList.add("tableView");
   });
   
-  var modeSwitch = document.querySelector('.mode-switch');
-  modeSwitch.addEventListener('click', function () {document.documentElement.classList.toggle('light');
-   modeSwitch.classList.toggle('active');
+  document.addEventListener('DOMContentLoaded', function () {
+    var modeSwitch = document.querySelector('.mode-switch');
+    if (modeSwitch) {
+      modeSwitch.addEventListener('click', function () {
+        document.documentElement.classList.toggle('light');
+        modeSwitch.classList.toggle('active');
+      });
+    }
   });
+
+
+// для план/факта выделяет цветом
+document.addEventListener("DOMContentLoaded", () => {
+  const productCells = document.querySelectorAll(".product-cell");
+
+  productCells.forEach(cell => {
+      const factSpan = cell.querySelector(".fact");
+      const planSpan = cell.querySelector(".plan");
+
+      // Проверяем наличие элементов
+      if (!factSpan || !planSpan) {
+          console.warn("Не удалось найти один из span в:", cell);
+          return; // Прерываем текущую итерацию, если элементы не найдены
+      }
+
+      const factValue = parseFloat(factSpan.textContent);
+      const planValue = parseFloat(planSpan.textContent);
+
+      console.log(factValue, planValue); // Проверка значений
+
+      // Сравниваем значения
+      if (factValue < planValue) {
+          factSpan.classList.add("highlight-red");
+      } else {
+          factSpan.classList.add("highlight-green");
+      }
+
+      // Добавляем классы для планового значения
+      // if (factValue >= planValue) {
+      //     planSpan.classList.add("highlight-green");
+      // } else {
+      //     planSpan.classList.add("highlight-red");
+      // }
+  });
+});
