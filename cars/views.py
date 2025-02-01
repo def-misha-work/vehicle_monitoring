@@ -32,44 +32,53 @@ logging.basicConfig(level=logging.INFO)
 
 
 @login_required
-def set_time_period(request):
-    if request.method == 'POST':
-        form = TimePeriodForm(request.POST)
-        if form.is_valid():
-            time_period = form.save(commit=False)
-            time_period.account_name = request.user
-            time_period.save()
-            return redirect('car_list')
-    else:
-        form = TimePeriodForm()
-    return render(request, 'cars/set_time_period.html', {'form': form})
+def settings(request):
+    user = request.user
+    logging.info(f"User: {user}")
 
+    if not Jsession.objects.filter(user=user).exists():
+        messages.error(request, "Ошибка авторизации")
+        return redirect("login")
 
-@login_required
-def set_plan_period(request):
-    if request.method == 'POST':
-        form = PlanPeriodForm(request.POST)
-        if form.is_valid():
-            plan_period = form.save(commit=False)
-            plan_period.account_name = request.user
-            plan_period.save()
-            return redirect('car_list')
-    else:
-        form = PlanPeriodForm()
-    return render(request, 'cars/set_plan_period.html', {'form': form})
+    form_plan = PlanPeriodForm()
+    form_time = TimePeriodForm()
+
+    if request.method == "POST":
+        if "submit_plan_period" in request.POST:
+            form_plan = PlanPeriodForm(request.POST)
+            if form_plan.is_valid():
+                plan_period = form_plan.save(commit=False)
+                plan_period.account_name = request.user
+                plan_period.save()
+                messages.info("План обновлен")
+                return redirect("settings")
+        if "submit_time_period" in request.POST:
+            form_time = TimePeriodForm(request.POST)
+            if form_time.is_valid():
+                time_period = form_time.save(commit=False)
+                time_period.account_name = request.user
+                time_period.save()
+                messages.info("Смена обновлена")
+                return redirect("settings")
+
+    return render(
+        request,
+        "cars/settings.html",
+        {"form_plan": form_plan, "form_time": form_time}
+    )
 
 
 @login_required
 def car_list(request):
     user = request.user
     logging.info(f"User: {user}")
-    if not Jsession.objects.get(user=user):
+    if not Jsession.objects.filter(user=user).exists():
         messages.error(request, "Ошибка авторизации")
         return redirect("login")
 
     # По умолчанию фильтруем за сегодня
     period = request.GET.get("period", "today")
-    time_period = TimePeriod.objects.filter(account_name=user).order_by('-id').first()
+    time_period = TimePeriod.objects.filter(account_name=user).order_by("-id").first()
     today = timezone.now().date()
 
     # Подзапрос для получения последнего значения ostatok_na_tekushchii_moment
@@ -87,7 +96,7 @@ def car_list(request):
 
         daily_data = DailyData.objects.filter(
             dt__range=[start_time, end_time]
-        ).values('car__id_car').annotate(
+        ).values("car__id_car").annotate(
             raskhod_za_period=Sum("raskhod_za_period"),
             probeg_za_period=Sum("probeg_za_period"),
             tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),

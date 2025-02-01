@@ -31,7 +31,12 @@ document.querySelector(".jsFilter").addEventListener("click", function () {
     document.querySelector(".products-area-wrapper").classList.add("tableView");
   });
   
-  var modeSwitch = document.querySelector('.mode-switch');
-  modeSwitch.addEventListener('click', function () {document.documentElement.classList.toggle('light');
-   modeSwitch.classList.toggle('active');
+  document.addEventListener('DOMContentLoaded', function () {
+    var modeSwitch = document.querySelector('.mode-switch');
+    if (modeSwitch) {
+      modeSwitch.addEventListener('click', function () {
+        document.documentElement.classList.toggle('light');
+        modeSwitch.classList.toggle('active');
+      });
+    }
   });
