@@ -115,8 +115,8 @@ def car_list(request):
         # Если план не существует, создаем его с plan_reisov = 0
         plan = PlanPeriod.objects.create(
             account_name=user,
-            plan_reisov=0,
-            plan_ves_za_period=0,
+            plan_reisov=1,
+            plan_ves_za_period=1,
         )
 
     if period == "smena":
@@ -145,11 +145,11 @@ def car_list(request):
             max_ves_za_period=Min("max_ves_za_period"),
             avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
             chart_data_kolichestvo_reisov=ExpressionWrapper(
-                F('kolichestvo_reisov') * 100.0 / plan.plan_reisov,
+                (F('kolichestvo_reisov') / plan.plan_reisov) * 100.0,
                 output_field=FloatField()
             ),
             chart_data_tekushchaya_nagruzka=ExpressionWrapper(
-                F('tekushchaya_nagruzka') * 100.0 / plan.plan_ves_za_period,
+                (F('tekushchaya_nagruzka') / plan.plan_ves_za_period) * 100.0,
                 output_field=FloatField()
             ),
         )
@@ -172,11 +172,11 @@ def car_list(request):
             max_ves_za_period=Min("max_ves_za_period"),
             avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
             chart_data_kolichestvo_reisov=ExpressionWrapper(
-                F('kolichestvo_reisov') * 100.0 / plan.plan_reisov,
+                (F('kolichestvo_reisov') / plan.plan_reisov) * 100.0,
                 output_field=FloatField()
             ),
             chart_data_tekushchaya_nagruzka=ExpressionWrapper(
-                F('tekushchaya_nagruzka') * 100.0 / plan.plan_ves_za_period,
+                (F('tekushchaya_nagruzka') / plan.plan_ves_za_period) * 100.0,
                 output_field=FloatField()
             ),
         )
@@ -200,11 +200,11 @@ def car_list(request):
             max_ves_za_period=Min("max_ves_za_period"),
             avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
             chart_data_kolichestvo_reisov=ExpressionWrapper(
-                F('kolichestvo_reisov') * 100.0 / plan.plan_reisov,
+                (F('kolichestvo_reisov') / plan.plan_reisov) * 100.0,
                 output_field=FloatField()
             ),
             chart_data_tekushchaya_nagruzka=ExpressionWrapper(
-                F('tekushchaya_nagruzka') * 100.0 / plan.plan_ves_za_period,
+                (F('tekushchaya_nagruzka') / plan.plan_ves_za_period) * 100.0,
                 output_field=FloatField()
             ),
         )
