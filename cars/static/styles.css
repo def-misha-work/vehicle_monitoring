@@ -18,6 +18,9 @@
   --app-content-secondary-color: #1d283c;
   --filter-reset: #2c394f;
   --filter-shadow: rgba(16, 24, 39, 0.8) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  --color-red: #e90b3a;
+  --color-green: #a0ff03;
+  --color-blue: #1ad5de;
 }
 
 .light:root {
@@ -30,6 +33,9 @@
   --sidebar-active-link: rgba(195, 207, 244, 1);
   --sidebar-main-color: #1f1c2e;
   --filter-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  --color-red: #e90b3a;
+  --color-green: #a0ff03;
+  --color-blue: #1ad5de;
 }
 
 body, html {
@@ -41,7 +47,7 @@ body, html {
 
 body {
   overflow: hidden;
-  font-family: "Poppins", sans-serif;
+  font-family: "Arial", sans-serif;
   background-color: var(--app-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -91,7 +97,7 @@ body {
   padding: 10px 16px;
   color: var(--sidebar-link);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 22px;
   line-height: 24px;
 }
 .sidebar-list-item svg {
@@ -157,7 +163,7 @@ body {
      object-fit: cover;
 }
 .account-info-name {
-  font-size: 14px;
+  font-size: 22px;
   color: var(--sidebar-main-color);
   margin: 0 8px;
   overflow: hidden;
@@ -283,7 +289,7 @@ body {
   display: flex;
   align-items: center;
   color: var(--app-content-main-color);
-  font-size: 14px;
+  font-size: 22px;
   margin-left: 8px;
   cursor: pointer;
 }
@@ -426,7 +432,7 @@ body {
   flex: 1;
   padding: 8px 16px;
   color: var(--app-content-main-color);
-  font-size: 14px;
+  font-size: 18px;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -611,6 +617,7 @@ body {
 
 
 /* мои стили */
+/* Иконки */
 .icon-svg {
   filter: brightness(0) saturate(100%) invert(1);
 }
@@ -699,6 +706,7 @@ body {
 /* Дата в фильтре. */
 .now_date_in_fiter {
   margin-left: 0px;
+  font-size: 22px;
 }
 
 
@@ -863,4 +871,32 @@ body {
 
 .highlight-green {
   color: green;
+}
+
+/* Для блока над диаграммой */
+.color-box {
+  width: 60px; /* Ширина 20 пикселей */
+  height: 20px; /* Высота 40 пикселей */
+  margin-right: 8px; 
+}
+
+.color-box.color-box-red {
+  background-color: var(--color-red) !important;
+}
+
+.color-box-green {
+  background-color: var(--color-green) !important;
+}
+
+.color-box-blue {
+  background-color: var(--color-blue) !important;
+}
+.color-box-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.second-cell {
+  align-items: flex-start !important;
 }
