@@ -33,14 +33,37 @@
     <h2>Задать время для смены</h2>
     <form method="post" class="settings-form">
       {% csrf_token %}
+
+      <!-- Смена 1 -->
       <div class="form-group">
-        <label for="{{ form_time.start_time.id_for_label }}">Начало смены: {{ smena_period.start_time }}</label>
-        {{ form_time.start_time }}
+        <label for="{{ form_time.shift1_start.id_for_label }}">Начало смены 1: {{ smena_period.shift1_start }}</label>
+        {{ form_time.shift1_start }}
       </div>
       <div class="form-group">
-        <label for="{{ form_time.end_time.id_for_label }}">Конец смены: {{ smena_period.end_time }}</label>
-        {{ form_time.end_time }}
+        <label for="{{ form_time.shift1_end.id_for_label }}">Конец смены 1: {{ smena_period.shift1_end }}</label>
+        {{ form_time.shift1_end }}
       </div>
+
+      <!-- Смена 2 -->
+      <div class="form-group">
+        <label for="{{ form_time.shift2_start.id_for_label }}">Начало смены 2: {{ smena_period.shift2_start }}</label>
+        {{ form_time.shift2_start }}
+      </div>
+      <div class="form-group">
+        <label for="{{ form_time.shift2_end.id_for_label }}">Конец смены 2: {{ smena_period.shift2_end }}</label>
+        {{ form_time.shift2_end }}
+      </div>
+
+      <!-- Смена 3 -->
+      <div class="form-group">
+        <label for="{{ form_time.shift3_start.id_for_label }}">Начало смены 3: {{ smena_period.shift3_start }}</label>
+        {{ form_time.shift3_start }}
+      </div>
+      <div class="form-group">
+        <label for="{{ form_time.shift3_end.id_for_label }}">Конец смены 3: {{ smena_period.shift3_end }}</label>
+        {{ form_time.shift3_end }}
+      </div>
+
       <button type="submit" name="submit_time_period" class="submit-button">Сохранить</button>
     </form>
   </div>
