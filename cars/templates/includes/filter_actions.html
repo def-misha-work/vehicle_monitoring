@@ -11,11 +11,11 @@
     
     <div class="today-buttons-wrapper" style="display: flex; gap: 8px;">
       <select onchange="location = this.value;" class="smena_select">
-        <option value="{% url 'car_list' %}?period=smena">Смена</option>
-        <option value="{% url 'car_list' %}?period=smena_all">Смены суммарно</option>
-        <option value="{% url 'car_list' %}?period=smena1">Смена 1</option>
-        <option value="{% url 'car_list' %}?period=smena2">Смена 2</option>
-        <option value="{% url 'car_list' %}?period=smena3">Смена 3</option>
+        <option value="?period=smena">Смена</option>
+        <option value="?period=smena_all">Смены суммарно</option>
+        <option value="?period=smena1">Смена 1</option>
+        <option value="?period=smena2">Смена 2</option>
+        <option value="?period=smena3">Смена 3</option>
       </select>
       <!-- <a href="{% url 'car_list' %}?period=smena" class="action-button">Смена</a> -->
       <a href="{% url 'car_list' %}?period=today" class="action-button">Сегодня</a>
