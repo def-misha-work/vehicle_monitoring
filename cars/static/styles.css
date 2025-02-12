@@ -39,7 +39,7 @@
 }
 
 body, html {
-  margin: 0 auto;
+  margin: -10 auto !important;
   padding: 0;
   height: 100%;
   width: 100%;
@@ -808,18 +808,18 @@ body {
 
 /* Основные стили для формы */
 .settings-form {
-  max-width: 500px;
+  max-width: 400px;
   margin: 0 auto;
 }
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .form-group label {
   display: block;
   font-size: 14px;
   color: var(--app-content-main-color);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .form-group input,
@@ -858,10 +858,16 @@ body {
 }
 
 /* Стили для заголовков */
-.setting_field h2 {
+.settings_field h2 {
   color: var(--app-content-main-color);
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   text-align: center; /* Добавьте это свойство */
+}
+
+.settings_field {
+  display: flex;
+  justify-content: flex-start;
+  gap: 30px;
 }
 
 /* для план/факта */
@@ -899,4 +905,11 @@ body {
 
 .second-cell {
   align-items: flex-start !important;
+}
+
+/* Выпадашка смена */
+.smena_select {
+  background-color: var(--app-bg);
+    color: var(--sidebar-main-color);;
+    font-size: 20px;
 }
