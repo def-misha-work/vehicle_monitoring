@@ -6,7 +6,7 @@
 {% include 'includes/sidebar.html' %}
 <div class="app-content">
   <div class="app-content-header">
-    <h1 class="app-content-headerText">Настройки</h1>
+    <h1 class="app-content-headerText">НАСТРОЙКИ</h1>
     <button class="mode-switch" title="Switch Theme">
       <svg class="moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="24" height="24" viewBox="0 0 24 24">
         <defs></defs>
@@ -15,34 +15,56 @@
     </button>
   </div>
   {% include 'includes/filter_actions.html' %}
-  <div class="setting_field">
-    <h2>Установить план</h2>
-    <form method="post" class="settings-form">
-      {% csrf_token %}
-      <div class="form-group">
-        <label for="{{ form_plan.field_name.id_for_label }}">План по рейсам: {{ plan.plan_reisov }}</label>
-        {{ form_plan.plan_reisov }}
-      </div>
-      <div class="form-group">
-        <label for="{{ form_plan.another_field.id_for_label }}">План по весу (тонны): {{ plan.plan_ves_za_period }}</label>
-        {{ form_plan.plan_ves_za_period }}
-      </div>
-      <button type="submit" name="submit_plan_period" class="submit-button">Сохранить</button>
-    </form>
-
-    <h2>Задать время для смены</h2>
-    <form method="post" class="settings-form">
-      {% csrf_token %}
-      <div class="form-group">
-        <label for="{{ form_time.start_time.id_for_label }}">Начало смены: {{ smena_period.start_time }}</label>
-        {{ form_time.start_time }}
-      </div>
-      <div class="form-group">
-        <label for="{{ form_time.end_time.id_for_label }}">Конец смены: {{ smena_period.end_time }}</label>
-        {{ form_time.end_time }}
-      </div>
-      <button type="submit" name="submit_time_period" class="submit-button">Сохранить</button>
-    </form>
+  <div class="settings_field">
+    <div>
+      <h2>Установить план</h2>
+      <form method="post" class="settings-form">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="{{ form_plan.field_name.id_for_label }}">План по рейсам: {{ plan.plan_reisov }}</label>
+          {{ form_plan.plan_reisov }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form_plan.another_field.id_for_label }}">План по весу (тонны): {{ plan.plan_ves_za_period }}</label>
+          {{ form_plan.plan_ves_za_period }}
+        </div>
+        <button type="submit" name="submit_plan_period" class="submit-button">Сохранить</button>
+      </form>
+    </div>
+    <div class="">
+      <h2>Задать время для смены</h2>
+      <form method="post" class="settings-form">
+        {% csrf_token %}
+        <!-- Смена 1 -->
+        <div class="form-group">
+          <label for="{{ form_time.shift1_start.id_for_label }}">Начало смены 1: {{ smena_period.shift1_start }}</label>
+          {{ form_time.shift1_start }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form_time.shift1_end.id_for_label }}">Конец смены 1: {{ smena_period.shift1_end }}</label>
+          {{ form_time.shift1_end }}
+        </div>
+        <!-- Смена 2 -->
+        <div class="form-group">
+          <label for="{{ form_time.shift2_start.id_for_label }}">Начало смены 2: {{ smena_period.shift2_start }}</label>
+          {{ form_time.shift2_start }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form_time.shift2_end.id_for_label }}">Конец смены 2: {{ smena_period.shift2_end }}</label>
+          {{ form_time.shift2_end }}
+        </div>
+        <!-- Смена 3 -->
+        <div class="form-group">
+          <label for="{{ form_time.shift3_start.id_for_label }}">Начало смены 3: {{ smena_period.shift3_start }}</label>
+          {{ form_time.shift3_start }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form_time.shift3_end.id_for_label }}">Конец смены 3: {{ smena_period.shift3_end }}</label>
+          {{ form_time.shift3_end }}
+        </div>
+        <button type="submit" name="submit_time_period" class="submit-button">Сохранить</button>
+      </form>
+    </div>
   </div>
 </div>
 {% endblock %}

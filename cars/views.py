@@ -67,11 +67,14 @@ def settings(request):
             form_time = TimePeriodForm(request.POST)
             if form_time.is_valid():
                 if last_time_period:  # Если запись существует, обновляем её
-                    time_period = last_time_period
                     form_time.save(commit=False)  # Не сохраняем сразу
-                    time_period.start_time = form_time.cleaned_data['start_time']
-                    time_period.end_time = form_time.cleaned_data['end_time']
-                    time_period.save()
+                    last_time_period.shift1_start = form_time.cleaned_data['shift1_start']
+                    last_time_period.shift1_end = form_time.cleaned_data['shift1_end']
+                    last_time_period.shift2_start = form_time.cleaned_data['shift2_start']
+                    last_time_period.shift2_end = form_time.cleaned_data['shift2_end']
+                    last_time_period.shift3_start = form_time.cleaned_data['shift3_start']
+                    last_time_period.shift3_end = form_time.cleaned_data['shift3_end']
+                    last_time_period.save()
                 else:  # Если записи нет, создаем новую
                     time_period = form_time.save(commit=False)
                     time_period.account_name = request.user

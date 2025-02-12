@@ -6,7 +6,7 @@
   {% include 'includes/sidebar.html' %}
     <div class="app-content">
       <div class="app-content-header">
-        <h1 class="app-content-headerText">Машины</h1>
+        <h1 class="app-content-headerText">МАШИНЫ</h1>
         <button class="mode-switch" title="Switch Theme">
           <svg class="moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="24" height="24" viewBox="0 0 24 24">
             <defs></defs>
@@ -19,32 +19,39 @@
       <div class="products-area-wrapper tableView">
         <div class="products-header">
           <div class="product-cell icon-svg">
-            Машины
-            <img src="{% static 'img/van.svg' %}" alt="Машины">
+            МАШИНЫ
+            <img src="{% static 'img/van.svg' %}">
+          </div>
+          <div class="product-cell second-cell">
+            <div class="color-box-row">
+              <div class="color-box color-box-red"></div><div class="">М.КУБ.</div>
+            </div>
+            <div class="color-box-row">
+              <div class="color-box color-box-green"></div><div class="">ТОПЛИВО</div>
+            </div>
+            <div class="color-box-row">
+              <div class="color-box color-box-blue"></div><div class="">РЕЙСЫ</div>
+            </div>
           </div>
           <div class="product-cell icon-svg">
-            М. куб. Топливо. Рейсы.
-            <img src="{% static 'img/percent.svg' %}" alt="Машины">
+            ПРОБЕГ
+            <img src="{% static 'img/map.svg' %}">
           </div>
           <div class="product-cell icon-svg">
-            Пробег
-            <img src="{% static 'img/map.svg' %}" alt="Машины">
+            РАСХОД
+            <img src="{% static 'img/fuel.svg' %}">
           </div>
           <div class="product-cell icon-svg">
-            Расход
-            <img src="{% static 'img/fuel.svg' %}" alt="Машины">
+            РЕЙСЫ
+            <img src="{% static 'img/way.svg' %}">
           </div>
           <div class="product-cell icon-svg">
-            Рейсы
-            <img src="{% static 'img/way.svg' %}" alt="Машины">
+            ВЕС
+            <img src="{% static 'img/weight.svg' %}">
           </div>
           <div class="product-cell icon-svg">
-            Вес
-            <img src="{% static 'img/weight.svg' %}" alt="Машины">
-          </div>
-          <div class="product-cell icon-svg">
-            Сутки
-            <img src="{% static 'img/clock.svg' %}" alt="Машины">
+            СУТКИ
+            <img src="{% static 'img/clock.svg' %}">
           </div>
         </div>
       {% include 'includes/cars_feed.html' %}
