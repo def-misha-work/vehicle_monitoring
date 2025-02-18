@@ -26,41 +26,33 @@ class Jsession(models.Model):
 
 
 class PlanPeriod(models.Model):
-    account_name = models.ForeignKey(
+    account_name = models.OneToOneField(
         User, on_delete=models.CASCADE, verbose_name="Пользователь"
     )
-    plan_reisov = models.IntegerField(verbose_name="План по рейсам")
-    plan_ves_za_period = models.IntegerField(verbose_name="План по тоннам (весу)")
-
-
-class TimePeriod(models.Model):
-    account_name = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    plan_reisov = models.IntegerField(
+        verbose_name="План по рейсам", default=1
+        )
+    plan_ves_za_period = models.IntegerField(
+        verbose_name="План по тоннам (весу)", default=1
     )
 
-    # Смена 1
-    shift1_start = models.TimeField(verbose_name="Начало смены 1", default="08:00")
-    shift1_end = models.TimeField(verbose_name="Окончание смены 1", default="16:00")
 
-    # Смена 2
-    shift2_start = models.TimeField(verbose_name="Начало смены 2", default="16:00")
-    shift2_end = models.TimeField(verbose_name="Окончание смены 2", default="00:00")
-
-    # Смена 3
-    shift3_start = models.TimeField(verbose_name="Начало смены 3", default="00:00")
-    shift3_end = models.TimeField(verbose_name="Окончание смены 3", default="08:00")
-
-    class Meta:
-        verbose_name = "Смена"
-        verbose_name_plural = "Смены"
+class SmenaOne(models.Model):
+    account_name = models.OneToOneField(
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    start = models.TimeField(
+        verbose_name="Начало первой смены", default="08:00"
+    )
+    end = models.TimeField(
+        verbose_name="Окончание первой смены", default="16:00"
+    )
 
     def __str__(self):
-        return (
-            f"Смены для {self.account_name}: "
-            f"1: {self.shift1_start}-{self.shift1_end}, "
-            f"2: {self.shift2_start}-{self.shift2_end}, "
-            f"3: {self.shift3_start}-{self.shift3_end}"
-        )
+        return f"Первая смена c {self.start} по {self.end}"
+
+    class Meta:
+        verbose_name = "Первая смена"
 
 
 class Cars(models.Model):
