@@ -16,13 +16,20 @@ from django.core.paginator import Paginator
 from django.db.models import (
     Sum, Subquery, OuterRef, Avg, Min, ExpressionWrapper, F, FloatField,
 )
-from cars.forms import SmenaOneForm, PlanPeriodForm
+from cars.forms import (
+    SmenaOneForm,
+    PlanPeriodForm,
+    SmenaTwoForm,
+    SmenaThreeForm,
+)
 from cars.models import (
     Jsession,
     User,
     UserPassword,
     DailyData,
     SmenaOne,
+    SmenaTwo,
+    SmenaThree,
     PlanPeriod,
 )
 from cars.utils import encrypt_password
@@ -48,12 +55,26 @@ def settings(request):
             "plan_ves_za_period": plan.plan_ves_za_period
         }
     )
-    smena, created = SmenaOne.objects.get_or_create(account_name=user)
     # передаем в форму текущие значения
+    smena_one, created = SmenaOne.objects.get_or_create(account_name=user)
     smena_one = SmenaOneForm(
         initial={
-            "start": smena.start,
-            "end": smena.end
+            "start": smena_one.start,
+            "end": smena_one.end
+        }
+    )
+    smena_two, created = SmenaOne.objects.get_or_create(account_name=user)
+    smena_two = SmenaTwoForm(
+        initial={
+            "start": smena_two.start,
+            "end": smena_two.end
+        }
+    )
+    smena_three, created = SmenaOne.objects.get_or_create(account_name=user)
+    smena_three = SmenaThreeForm(
+        initial={
+            "start": smena_three.start,
+            "end": smena_three.end
         }
     )
 
@@ -90,12 +111,46 @@ def settings(request):
                     smena_one.save()
                 return redirect("settings")
 
+        if "submit_smena_two" in request.POST:
+            form_time = SmenaTwoForm(request.POST)
+            if form_time.is_valid():
+                smena_two, created = SmenaTwo.objects.get_or_create(
+                    account_name=user,
+                    defaults={
+                        "start": f"{form_time.cleaned_data['start']}:00",
+                        "end": f"{form_time.cleaned_data['end']}:00"
+                    }
+                )
+                if not created:
+                    smena_two.start = form_time.cleaned_data["start"]
+                    smena_two.end = form_time.cleaned_data["end"]
+                    smena_two.save()
+                return redirect("settings")
+
+        if "submit_smena_three" in request.POST:
+            form_time = SmenaThreeForm(request.POST)
+            if form_time.is_valid():
+                smena_three, created = SmenaThree.objects.get_or_create(
+                    account_name=user,
+                    defaults={
+                        "start": f"{form_time.cleaned_data['start']}:00",
+                        "end": f"{form_time.cleaned_data['end']}:00"
+                    }
+                )
+                if not created:
+                    smena_three.start = form_time.cleaned_data["start"]
+                    smena_three.end = form_time.cleaned_data["end"]
+                    smena_three.save()
+                return redirect("settings")
+
     return render(
         request,
         "cars/settings.html",
         {
             "form_plan": form_plan,
             "form_smena_one": smena_one,
+            "form_smena_two": smena_two,
+            "form_smena_three": smena_three,
         }
     )
 
@@ -111,7 +166,6 @@ def car_list(request):
     # По умолчанию фильтруем за сегодня
     period = request.GET.get("period", "today")
     today = timezone.now().date()
-    # smena_period = SmenaOne.objects.filter(account_name=user).order_by("-id").first()
 
     # Подзапрос для получения последнего значения ostatok_na_tekushchii_moment
     last_ostatok_subquery = DailyData.objects.filter(
@@ -129,40 +183,49 @@ def car_list(request):
             plan_ves_za_period=1,
         )
 
-    # if period == "smena":
-    #     start_time = timezone.datetime.combine(today, time(9, 0))
-    #     end_time = timezone.datetime.combine(today, time(18, 0))
-    #     if smena_period:
-    #         start_time = smena_period.start_time
-    #         end_time = smena_period.end_time
+    if period == "smena_one" or period == "smena_two" or period == "smena_three":
+        if period == "smena_one":
+            smena, created = SmenaOne.objects.get_or_create(account_name=user)
+        if period == "smena_two":
+            smena, created = SmenaTwo.objects.get_or_create(account_name=user)
+        if period == "smena_three":
+            smena, created = SmenaThree.objects.get_or_create(account_name=user)
+        today = timezone.now().date()
+        start_time = datetime.combine(
+            today, datetime.min.time()
+        ) + timedelta(hours=smena.start)
+        end_time = datetime.combine(
+            today, datetime.min.time()
+        ) + timedelta(hours=smena.end + 1)
 
-    #     daily_data = DailyData.objects.filter(
-    #         dt__range=[start_time, end_time]
-    #     ).values("car__id_car").annotate(
-    #         raskhod_za_period=Sum("raskhod_za_period"),
-    #         probeg_za_period=Sum("probeg_za_period"),
-    #         tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
-    #         kolichestvo_reisov=Sum("kolichestvo_reisov"),
-    #         summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
-    #         raskhod_privedennii_g_t_km_za_period=Sum("raskhod_privedennii_g_t_km_za_period"),
-    #         ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery),
-    #         sum_kolichestvo_poezdok_za_period=Sum("kolichestvo_poezdok_za_period"),
-    #         raskhod_za_poezdku=Sum("raskhod_za_poezdku"),
-    #         raskhod_na_khkh_za_period=Sum("raskhod_na_khkh_za_period"),
-    #         raskhod_pod_nagruzkoi_za_period=Sum("raskhod_pod_nagruzkoi_za_period"),
-    #         avg_kolichestvo_poezdok_za_period=Avg("kolichestvo_poezdok_za_period"),
-    #         min_ves_za_period=Min("min_ves_za_period"),
-    #         max_ves_za_period=Min("max_ves_za_period"),
-    #         avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
-    #         chart_data_kolichestvo_reisov=ExpressionWrapper(
-    #             (F("kolichestvo_reisov") / plan.plan_reisov) * 100.0,
-    #             output_field=FloatField()
-    #         ),
-    #         chart_data_tekushchaya_nagruzka=ExpressionWrapper(
-    #             (F("tekushchaya_nagruzka") / plan.plan_ves_za_period) * 100.0,
-    #             output_field=FloatField()
-    #         ),
-    #     )
+        daily_data = DailyData.objects.filter(
+            dt__range=[start_time, end_time]
+        ).values("car__id_car").annotate(
+            raskhod_za_period=Sum("raskhod_za_period"),
+            probeg_za_period=Sum("probeg_za_period"),
+            tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
+            kolichestvo_reisov=Sum("kolichestvo_reisov"),
+            summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
+            raskhod_privedennii_g_t_km_za_period=Sum("raskhod_privedennii_g_t_km_za_period"),
+            ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery),
+            sum_kolichestvo_poezdok_za_period=Sum("kolichestvo_poezdok_za_period"),
+            raskhod_za_poezdku=Sum("raskhod_za_poezdku"),
+            raskhod_na_khkh_za_period=Sum("raskhod_na_khkh_za_period"),
+            raskhod_pod_nagruzkoi_za_period=Sum("raskhod_pod_nagruzkoi_za_period"),
+            avg_kolichestvo_poezdok_za_period=Avg("kolichestvo_poezdok_za_period"),
+            min_ves_za_period=Min("min_ves_za_period"),
+            max_ves_za_period=Min("max_ves_za_period"),
+            avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
+            chart_data_kolichestvo_reisov=ExpressionWrapper(
+                (F("kolichestvo_reisov") / plan.plan_reisov) * 100.0,
+                output_field=FloatField()
+            ),
+            chart_data_tekushchaya_nagruzka=ExpressionWrapper(
+                (F("tekushchaya_nagruzka") / plan.plan_ves_za_period) * 100.0,
+                output_field=FloatField()
+            ),
+        )
+
 
     if period == "today":
         daily_data = DailyData.objects.filter(dt__date=today).values("car__id_car").annotate(

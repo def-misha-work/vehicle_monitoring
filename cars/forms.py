@@ -1,5 +1,7 @@
-from django import forms
-from cars.models import SmenaOne, PlanPeriod
+﻿from django import forms
+from cars.models import (
+    SmenaOne, PlanPeriod, SmenaThree, SmenaTwo
+)
 
 
 class PlanPeriodForm(forms.ModelForm):
@@ -27,6 +29,26 @@ class PlanPeriodForm(forms.ModelForm):
 class SmenaOneForm(forms.ModelForm):
     class Meta:
         model = SmenaOne
+        fields = ['start', 'end']
+        widgets = {
+            'start': forms.NumberInput(attrs={'min': 0, 'max': 23}),
+            'end': forms.NumberInput(attrs={'min': 0, 'max': 23}),
+        }
+
+
+class SmenaTwoForm(forms.ModelForm):
+    class Meta:
+        model = SmenaTwo
+        fields = ['start', 'end']
+        widgets = {
+            'start': forms.NumberInput(attrs={'min': 0, 'max': 23}),
+            'end': forms.NumberInput(attrs={'min': 0, 'max': 23}),
+        }
+
+
+class SmenaThreeForm(forms.ModelForm):
+    class Meta:
+        model = SmenaThree
         fields = ['start', 'end']
         widgets = {
             'start': forms.NumberInput(attrs={'min': 0, 'max': 23}),

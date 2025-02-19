@@ -56,6 +56,44 @@ class SmenaOne(models.Model):
         verbose_name_plural = "Смены"
 
 
+class SmenaTwo(models.Model):
+    account_name = models.OneToOneField(
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    start = models.IntegerField(
+        verbose_name="Начало смены (часы)", default=16
+    )
+    end = models.IntegerField(
+        verbose_name="Окончание смены (часы)", default=0
+    )
+
+    def __str__(self):
+        return f"Смена с {self.start}:00 по {self.end}:00"
+
+    class Meta:
+        verbose_name = "Смена"
+        verbose_name_plural = "Смены"
+
+
+class SmenaThree(models.Model):
+    account_name = models.OneToOneField(
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    start = models.IntegerField(
+        verbose_name="Начало смены (часы)", default=0
+    )
+    end = models.IntegerField(
+        verbose_name="Окончание смены (часы)", default=8
+    )
+
+    def __str__(self):
+        return f"Смена с {self.start}:00 по {self.end}:00"
+
+    class Meta:
+        verbose_name = "Смена"
+        verbose_name_plural = "Смены"
+
+
 class Cars(models.Model):
     id_car = models.CharField(
         max_length=255,

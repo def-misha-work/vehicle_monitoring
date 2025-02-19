@@ -1,4 +1,4 @@
-{% extends "cars/base.html" %}
+﻿{% extends "cars/base.html" %}
 
 {% load static %}
 
@@ -44,6 +44,36 @@
           {{ form_smena_one.end }}
         </div>
         <button type="submit" name="submit_smena_one" class="submit-button">Сохранить</button>
+      </form>
+    </div>
+    <div class="">
+      <h2>Вторая смена</h2>
+      <form method="post" class="settings-form">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>Начало смены (час)</label>
+          {{ form_smena_two.start }}
+        </div>
+        <div class="form-group">
+          <label>Конец смены (час)</label>
+          {{ form_smena_two.end }}
+        </div>
+        <button type="submit" name="submit_smena_two" class="submit-button">Сохранить</button>
+      </form>
+    </div>
+    <div class="">
+      <h2>Третья смена</h2>
+      <form method="post" class="settings-form">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>Начало смены (час)</label>
+          {{ form_smena_three.start }}
+        </div>
+        <div class="form-group">
+          <label>Конец смены (час)</label>
+          {{ form_smena_three.end }}
+        </div>
+        <button type="submit" name="submit_smena_three" class="submit-button">Сохранить</button>
       </form>
     </div>
   </div>
