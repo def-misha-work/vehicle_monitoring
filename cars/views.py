@@ -188,13 +188,13 @@ def car_list(request):
         smena_three, created = SmenaThree.objects.get_or_create(account_name=user)
 
         smena_one_start = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_one.start)
-        smena_one_end = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_one.end + 1)
+        smena_one_end = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_one.end) - timedelta(seconds=1)
 
         smena_two_start = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_two.start)
-        smena_two_end = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_two.end + 1)
+        smena_two_end = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_two.end) - timedelta(seconds=1)
 
         smena_three_start = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_three.start)
-        smena_three_end = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_three.end + 1)
+        smena_three_end = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_three.end) - timedelta(seconds=1)
 
         combined_filter = (
             Q(dt__range=[smena_one_start, smena_one_end]) |
@@ -241,7 +241,7 @@ def car_list(request):
         ) + timedelta(hours=smena.start)
         end_time = datetime.combine(
             today, datetime.min.time()
-        ) + timedelta(hours=smena.end + 1)
+        ) + timedelta(hours=smena.end) - timedelta(seconds=1)
 
         daily_data = DailyData.objects.filter(
             dt__range=[start_time, end_time]
