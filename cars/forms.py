@@ -1,4 +1,4 @@
-﻿from django import forms
+from django import forms
 from cars.models import SmenaOne, PlanPeriod
 
 
@@ -25,19 +25,10 @@ class PlanPeriodForm(forms.ModelForm):
 
 
 class SmenaOneForm(forms.ModelForm):
-    start = forms.IntegerField(
-        min_value=0,
-        max_value=24,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        label="Начало смены (часы)"
-    )
-    end = forms.IntegerField(
-        min_value=0,
-        max_value=24,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        label="Окончание смены (часы)"
-    )
-
     class Meta:
         model = SmenaOne
         fields = ['start', 'end']
+        widgets = {
+            'start': forms.NumberInput(attrs={'min': 0, 'max': 23}),
+            'end': forms.NumberInput(attrs={'min': 0, 'max': 23}),
+        }
