@@ -41,18 +41,19 @@ class SmenaOne(models.Model):
     account_name = models.OneToOneField(
         User, on_delete=models.CASCADE, verbose_name="Пользователь"
     )
-    start = models.TimeField(
-        verbose_name="Начало первой смены", default="08:00"
+    start = models.IntegerField(
+        verbose_name="Начало смены (часы)", default=8
     )
-    end = models.TimeField(
-        verbose_name="Окончание первой смены", default="16:00"
+    end = models.IntegerField(
+        verbose_name="Окончание смены (часы)", default=16
     )
 
     def __str__(self):
-        return f"Первая смена c {self.start} по {self.end}"
+        return f"Смена с {self.start}:00 по {self.end}:00"
 
     class Meta:
-        verbose_name = "Первая смена"
+        verbose_name = "Смена"
+        verbose_name_plural = "Смены"
 
 
 class Cars(models.Model):
