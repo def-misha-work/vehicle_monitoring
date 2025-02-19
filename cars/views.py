@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 # from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator
 from django.db.models import (
-    Sum, Subquery, OuterRef, Avg, Min, ExpressionWrapper, F, FloatField,
+    Sum, Subquery, OuterRef, Avg, Min, ExpressionWrapper, F, FloatField, Q,
 )
 from cars.forms import (
     SmenaOneForm,
@@ -63,14 +63,14 @@ def settings(request):
             "end": smena_one.end
         }
     )
-    smena_two, created = SmenaOne.objects.get_or_create(account_name=user)
+    smena_two, created = SmenaTwo.objects.get_or_create(account_name=user)
     smena_two = SmenaTwoForm(
         initial={
             "start": smena_two.start,
             "end": smena_two.end
         }
     )
-    smena_three, created = SmenaOne.objects.get_or_create(account_name=user)
+    smena_three, created = SmenaThree.objects.get_or_create(account_name=user)
     smena_three = SmenaThreeForm(
         initial={
             "start": smena_three.start,
@@ -182,6 +182,51 @@ def car_list(request):
             plan_reisov=1,
             plan_ves_za_period=1,
         )
+    if period == "smena_sum":
+        smena_one, created = SmenaOne.objects.get_or_create(account_name=user)
+        smena_two, created = SmenaTwo.objects.get_or_create(account_name=user)
+        smena_three, created = SmenaThree.objects.get_or_create(account_name=user)
+
+        smena_one_start = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_one.start)
+        smena_one_end = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_one.end + 1)
+
+        smena_two_start = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_two.start)
+        smena_two_end = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_two.end + 1)
+
+        smena_three_start = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_three.start)
+        smena_three_end = datetime.combine(today, datetime.min.time()) + timedelta(hours=smena_three.end + 1)
+
+        combined_filter = (
+            Q(dt__range=[smena_one_start, smena_one_end]) |
+            Q(dt__range=[smena_two_start, smena_two_end]) |
+            Q(dt__range=[smena_three_start, smena_three_end])
+        )
+
+        daily_data = DailyData.objects.filter(combined_filter).values("car__id_car").annotate(
+            raskhod_za_period=Sum("raskhod_za_period"),
+            probeg_za_period=Sum("probeg_za_period"),
+            tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
+            kolichestvo_reisov=Sum("kolichestvo_reisov"),
+            summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
+            raskhod_privedennii_g_t_km_za_period=Sum("raskhod_privedennii_g_t_km_za_period"),
+            ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery),
+            sum_kolichestvo_poezdok_za_period=Sum("kolichestvo_poezdok_za_period"),
+            raskhod_za_poezdku=Sum("raskhod_za_poezdku"),
+            raskhod_na_khkh_za_period=Sum("raskhod_na_khkh_za_period"),
+            raskhod_pod_nagruzkoi_za_period=Sum("raskhod_pod_nagruzkoi_za_period"),
+            avg_kolichestvo_poezdok_za_period=Avg("kolichestvo_poezdok_za_period"),
+            min_ves_za_period=Min("min_ves_za_period"),
+            max_ves_za_period=Min("max_ves_za_period"),
+            avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
+            chart_data_kolichestvo_reisov=ExpressionWrapper(
+                (F("kolichestvo_reisov") / plan.plan_reisov) * 100.0,
+                output_field=FloatField()
+            ),
+            chart_data_tekushchaya_nagruzka=ExpressionWrapper(
+                (F("tekushchaya_nagruzka") / plan.plan_ves_za_period) * 100.0,
+                output_field=FloatField()
+            ),
+        )
 
     if period == "smena_one" or period == "smena_two" or period == "smena_three":
         if period == "smena_one":
@@ -190,7 +235,7 @@ def car_list(request):
             smena, created = SmenaTwo.objects.get_or_create(account_name=user)
         if period == "smena_three":
             smena, created = SmenaThree.objects.get_or_create(account_name=user)
-        today = timezone.now().date()
+        # today = timezone.now().date()
         start_time = datetime.combine(
             today, datetime.min.time()
         ) + timedelta(hours=smena.start)
@@ -225,7 +270,6 @@ def car_list(request):
                 output_field=FloatField()
             ),
         )
-
 
     if period == "today":
         daily_data = DailyData.objects.filter(dt__date=today).values("car__id_car").annotate(
