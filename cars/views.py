@@ -49,6 +49,7 @@ def settings(request):
         }
     )
     smena, created = SmenaOne.objects.get_or_create(account_name=user)
+    # передаем в форму текущие значения
     smena_one = SmenaOneForm(
         initial={
             "start": smena.start,
@@ -79,8 +80,8 @@ def settings(request):
                 smena_one, created = SmenaOne.objects.get_or_create(
                     account_name=user,
                     defaults={
-                        "start": f"{form_time.cleaned_data['start_hour']}:00",
-                        "end": f"{form_time.cleaned_data['end_hour']}:00"
+                        "start": f"{form_time.cleaned_data['start']}:00",
+                        "end": f"{form_time.cleaned_data['end']}:00"
                     }
                 )
                 if not created:
