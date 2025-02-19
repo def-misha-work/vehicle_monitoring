@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 # from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator
 from django.db.models import (
-    Sum, Subquery, OuterRef, Avg, Min, ExpressionWrapper, F, FloatField, Q,
+    Sum, Subquery, OuterRef, Avg, Min, Max, ExpressionWrapper, F, FloatField, Q,
 )
 from cars.forms import (
     SmenaOneForm,
