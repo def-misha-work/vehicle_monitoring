@@ -1,7 +1,8 @@
-from django.db import models
-from django.contrib.auth import get_user_model
-from django.utils import timezone
+import logging
 
+from django.contrib.auth import get_user_model
+from django.db import models
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -14,11 +15,7 @@ class UserPassword(models.Model):
 
 
 class Jsession(models.Model):
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name="jsession"
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="jsession")
     jsession = models.CharField(max_length=255)
 
     def __str__(self):
@@ -29,9 +26,7 @@ class PlanPeriod(models.Model):
     account_name = models.OneToOneField(
         User, on_delete=models.CASCADE, verbose_name="Пользователь"
     )
-    plan_reisov = models.IntegerField(
-        verbose_name="План по рейсам", default=1
-        )
+    plan_reisov = models.IntegerField(verbose_name="План по рейсам", default=1)
     plan_ves_za_period = models.IntegerField(
         verbose_name="План по тоннам (весу)", default=1
     )
@@ -41,12 +36,8 @@ class SmenaOne(models.Model):
     account_name = models.OneToOneField(
         User, on_delete=models.CASCADE, verbose_name="Пользователь"
     )
-    start = models.IntegerField(
-        verbose_name="Начало смены (часы)", default=8
-    )
-    end = models.IntegerField(
-        verbose_name="Окончание смены (часы)", default=16
-    )
+    start = models.IntegerField(verbose_name="Начало смены (часы)", default=8)
+    end = models.IntegerField(verbose_name="Окончание смены (часы)", default=16)
 
     def __str__(self):
         return f"Смена с {self.start}:00 по {self.end}:00"
@@ -60,12 +51,8 @@ class SmenaTwo(models.Model):
     account_name = models.OneToOneField(
         User, on_delete=models.CASCADE, verbose_name="Пользователь"
     )
-    start = models.IntegerField(
-        verbose_name="Начало смены (часы)", default=16
-    )
-    end = models.IntegerField(
-        verbose_name="Окончание смены (часы)", default=0
-    )
+    start = models.IntegerField(verbose_name="Начало смены (часы)", default=16)
+    end = models.IntegerField(verbose_name="Окончание смены (часы)", default=0)
 
     def __str__(self):
         return f"Смена с {self.start}:00 по {self.end}:00"
@@ -79,12 +66,8 @@ class SmenaThree(models.Model):
     account_name = models.OneToOneField(
         User, on_delete=models.CASCADE, verbose_name="Пользователь"
     )
-    start = models.IntegerField(
-        verbose_name="Начало смены (часы)", default=0
-    )
-    end = models.IntegerField(
-        verbose_name="Окончание смены (часы)", default=8
-    )
+    start = models.IntegerField(verbose_name="Начало смены (часы)", default=0)
+    end = models.IntegerField(verbose_name="Окончание смены (часы)", default=8)
 
     def __str__(self):
         return f"Смена с {self.start}:00 по {self.end}:00"
@@ -255,7 +238,46 @@ class DailyData(models.Model):
     class Meta:
         verbose_name = "Ежедневные данные"
         verbose_name_plural = "Ежедневные данные"
-        unique_together = ('car', 'dt')  # Уникальная запись для машины и даты
+        unique_together = ("car", "dt")  # Уникальная запись для машины и даты
 
     def __str__(self):
         return f"Данные для {self.car.id_car} на {self.dt}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        try:
+            if not hasattr(self, "work_shift"):
+                work_shift = WorkShift()
+                work_shift.daily_data_id = self.id
+                work_shift.save()
+        except Exception as e:
+            logging.info(f"Ошибка при создании обьекта WorkShift: {e}")
+
+
+class WorkShift(models.Model):
+    daily_data = models.OneToOneField(
+        DailyData, on_delete=models.CASCADE, related_name="work_shift"
+    )
+    work_shift_name = models.CharField(
+        default="",
+        max_length=255,
+        verbose_name="Смена",
+        null=True,
+        blank=True,
+    )
+
+    @staticmethod
+    def get_shift_name(dt):
+        if 8 <= dt.hour < 16:
+            return "C1"
+        elif 16 <= dt.hour:
+            return "C2"
+        else:
+            return "C3"
+
+    def save(self, *args, **kwargs):
+        self.work_shift_name = self.get_shift_name(self.daily_data.dt)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Информация о смене: {self.id} - {self.work_shift_name} - daily_data_id: {self.daily_data.id}"
