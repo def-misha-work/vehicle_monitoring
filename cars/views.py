@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, timezone
 
 import requests
 from django.contrib import messages
@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 from django.db.models import (Avg, ExpressionWrapper, F, FloatField, Max, Min,
                               OuterRef, Q, Subquery, Sum)
 from django.shortcuts import redirect, render
-from django.utils import timezone
+from django.utils import timezone as django_timezone
 
 from cars.constants import URL_GET_JSESSION
 from cars.forms import (PlanPeriodForm, SmenaOneForm, SmenaThreeForm,
@@ -140,7 +140,7 @@ def car_list(request):
 
     # По умолчанию фильтруем за сегодня
     period = request.GET.get("period", "today")
-    today = timezone.now().date()
+    today = datetime.utcnow()
 
     # Подзапрос для получения последнего значения ostatok_na_tekushchii_moment
     last_ostatok_subquery = (
@@ -158,75 +158,75 @@ def car_list(request):
             plan_reisov=1,
             plan_ves_za_period=1,
         )
-    if period == "smena_sum":
-        smena_one, created = SmenaOne.objects.get_or_create(account_name=user)
-        smena_two, created = SmenaTwo.objects.get_or_create(account_name=user)
-        smena_three, created = SmenaThree.objects.get_or_create(account_name=user)
+    # if period == "smena_sum":
+    #     smena_one, created = SmenaOne.objects.get_or_create(account_name=user)
+    #     smena_two, created = SmenaTwo.objects.get_or_create(account_name=user)
+    #     smena_three, created = SmenaThree.objects.get_or_create(account_name=user)
 
-        smena_one_start = datetime.combine(today, datetime.min.time()) + timedelta(
-            hours=smena_one.start
-        )
-        smena_one_end = (
-            datetime.combine(today, datetime.min.time())
-            + timedelta(hours=smena_one.end)
-            - timedelta(seconds=1)
-        )
+    #     smena_one_start = datetime.combine(today, datetime.min.time()) + timedelta(
+    #         hours=smena_one.start
+    #     )
+    #     smena_one_end = (
+    #         datetime.combine(today, datetime.min.time())
+    #         + timedelta(hours=smena_one.end)
+    #         - timedelta(seconds=1)
+    #     )
 
-        smena_two_start = datetime.combine(today, datetime.min.time()) + timedelta(
-            hours=smena_two.start
-        )
-        smena_two_end = (
-            datetime.combine(today, datetime.min.time())
-            + timedelta(hours=smena_two.end)
-            - timedelta(seconds=1)
-        )
+    #     smena_two_start = datetime.combine(today, datetime.min.time()) + timedelta(
+    #         hours=smena_two.start
+    #     )
+    #     smena_two_end = (
+    #         datetime.combine(today, datetime.min.time())
+    #         + timedelta(hours=smena_two.end)
+    #         - timedelta(seconds=1)
+    #     )
 
-        smena_three_start = datetime.combine(today, datetime.min.time()) + timedelta(
-            hours=smena_three.start
-        )
-        smena_three_end = (
-            datetime.combine(today, datetime.min.time())
-            + timedelta(hours=smena_three.end)
-            - timedelta(seconds=1)
-        )
+    #     smena_three_start = datetime.combine(today, datetime.min.time()) + timedelta(
+    #         hours=smena_three.start
+    #     )
+    #     smena_three_end = (
+    #         datetime.combine(today, datetime.min.time())
+    #         + timedelta(hours=smena_three.end)
+    #         - timedelta(seconds=1)
+    #     )
 
-        combined_filter = (
-            Q(dt__range=[smena_one_start, smena_one_end])
-            | Q(dt__range=[smena_two_start, smena_two_end])
-            | Q(dt__range=[smena_three_start, smena_three_end])
-        )
+    #     combined_filter = (
+    #         Q(dt__range=[smena_one_start, smena_one_end])
+    #         | Q(dt__range=[smena_two_start, smena_two_end])
+    #         | Q(dt__range=[smena_three_start, smena_three_end])
+    #     )
 
-        daily_data = (
-            DailyData.objects.filter(combined_filter)
-            .values("car__id_car")
-            .annotate(
-                raskhod_za_period=Sum("raskhod_za_period"),
-                probeg_za_period=Sum("probeg_za_period"),
-                tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
-                kolichestvo_reisov=Sum("kolichestvo_reisov"),
-                summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
-                raskhod_privedennii_g_t_km_za_period=Sum(
-                    "raskhod_privedennii_g_t_km_za_period"
-                ),
-                ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery),
-                sum_kolichestvo_poezdok_za_period=Sum("kolichestvo_poezdok_za_period"),
-                raskhod_za_poezdku=Sum("raskhod_za_poezdku"),
-                raskhod_na_khkh_za_period=Sum("raskhod_na_khkh_za_period"),
-                raskhod_pod_nagruzkoi_za_period=Sum("raskhod_pod_nagruzkoi_za_period"),
-                avg_kolichestvo_poezdok_za_period=Avg("kolichestvo_poezdok_za_period"),
-                min_ves_za_period=Min("min_ves_za_period"),
-                max_ves_za_period=Min("max_ves_za_period"),
-                avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
-                chart_data_kolichestvo_reisov=ExpressionWrapper(
-                    (F("kolichestvo_reisov") / plan.plan_reisov) * 100.0,
-                    output_field=FloatField(),
-                ),
-                chart_data_tekushchaya_nagruzka=ExpressionWrapper(
-                    (F("tekushchaya_nagruzka") / plan.plan_ves_za_period) * 100.0,
-                    output_field=FloatField(),
-                ),
-            )
-        )
+    #     daily_data = (
+    #         DailyData.objects.filter(combined_filter)
+    #         .values("car__id_car")
+    #         .annotate(
+    #             raskhod_za_period=Sum("raskhod_za_period"),
+    #             probeg_za_period=Sum("probeg_za_period"),
+    #             tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
+    #             kolichestvo_reisov=Sum("kolichestvo_reisov"),
+    #             summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
+    #             raskhod_privedennii_g_t_km_za_period=Sum(
+    #                 "raskhod_privedennii_g_t_km_za_period"
+    #             ),
+    #             ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery),
+    #             sum_kolichestvo_poezdok_za_period=Sum("kolichestvo_poezdok_za_period"),
+    #             raskhod_za_poezdku=Sum("raskhod_za_poezdku"),
+    #             raskhod_na_khkh_za_period=Sum("raskhod_na_khkh_za_period"),
+    #             raskhod_pod_nagruzkoi_za_period=Sum("raskhod_pod_nagruzkoi_za_period"),
+    #             avg_kolichestvo_poezdok_za_period=Avg("kolichestvo_poezdok_za_period"),
+    #             min_ves_za_period=Min("min_ves_za_period"),
+    #             max_ves_za_period=Min("max_ves_za_period"),
+    #             avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
+    #             chart_data_kolichestvo_reisov=ExpressionWrapper(
+    #                 (F("kolichestvo_reisov") / plan.plan_reisov) * 100.0,
+    #                 output_field=FloatField(),
+    #             ),
+    #             chart_data_tekushchaya_nagruzka=ExpressionWrapper(
+    #                 (F("tekushchaya_nagruzka") / plan.plan_ves_za_period) * 100.0,
+    #                 output_field=FloatField(),
+    #             ),
+    #         )
+    #     )
 
     if period == "smena_one" or period == "smena_two" or period == "smena_three":
         if period == "smena_one":
@@ -235,16 +235,25 @@ def car_list(request):
             smena, created = SmenaTwo.objects.get_or_create(account_name=user)
         if period == "smena_three":
             smena, created = SmenaThree.objects.get_or_create(account_name=user)
-        # today = timezone.now().date()
-        start_time = datetime.combine(today, datetime.min.time()) + timedelta(
-            hours=smena.start
-        )
-        end_time = (
+        start_time = (
             datetime.combine(today, datetime.min.time())
-            + timedelta(hours=smena.end)
-            - timedelta(seconds=1)
+            + timedelta(hours=smena.start)
         )
-
+        if smena.start < smena.end:
+            end_time = (
+                start_time
+                + timedelta(hours=(smena.end - smena.start))
+                - timedelta(seconds=1)
+            )
+        else:
+            end_time = (
+                start_time
+                + timedelta(hours=(24 - smena.start + smena.end))
+                - timedelta(seconds=1)
+            )
+        start_time = start_time.replace(tzinfo=timezone.utc)
+        end_time = end_time.replace(tzinfo=timezone.utc)
+        print(f"start_time {start_time}, end_time {end_time}")
         daily_data = (
             DailyData.objects.filter(dt__range=[start_time, end_time])
             .values("car__id_car")
@@ -276,8 +285,9 @@ def car_list(request):
                 ),
             )
         )
+        print("sql: ", str(daily_data.query))
 
-    if period == "today":
+    if period == "today" or "smena_sum":
         daily_data = (
             DailyData.objects.filter(dt__date=today)
             .values("car__id_car")
@@ -309,11 +319,19 @@ def car_list(request):
                 ),
             )
         )
+        # print("sql: ", str(daily_data.query))
 
     if period == "yesterday":
-        start_date = today - timedelta(days=1)
+        start_time = (
+            datetime.combine(today, datetime.min.time())
+            - timedelta(hours=24)
+        )
+        end_time = (
+            datetime.combine(today, datetime.min.time())
+            - timedelta(seconds=1)
+            )
         daily_data = (
-            DailyData.objects.filter(dt__date__range=[start_date, today])
+            DailyData.objects.filter(dt__date__range=[start_time, end_time])
             .values("car__id_car")
             .annotate(
                 raskhod_za_period=Sum("raskhod_za_period"),
@@ -343,11 +361,22 @@ def car_list(request):
                 ),
             )
         )
+        print(f"start_time {start_time} end_time {end_time}")
 
     if period == "7days":
-        start_date = today - timedelta(days=7)
+        start_time = (
+            datetime.combine(today, datetime.min.time())
+            - timedelta(days=7)
+        )
+        end_time = (
+            datetime.combine(today, datetime.min.time())
+            - timedelta(seconds=1)
+            )
         daily_data = (
-            DailyData.objects.filter(dt__date__range=[start_date, today])
+            DailyData.objects.filter(
+                dt__date__range=[start_time, end_time],
+                # dt__hour__lt=12, dt__hour__gte=6,
+            )
             .values("car__id_car")
             .annotate(
                 raskhod_za_period=Sum("raskhod_za_period"),
@@ -369,11 +398,45 @@ def car_list(request):
                 avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
             )
         )
+        print(f"start_time {start_time} end_time {end_time}")
+
+    # if period == "7days":
+    #     start_date = today - timedelta(days=7)
+    #     daily_data = (
+    #         DailyData.objects.filter(dt__date__range=[start_date, today])
+    #         .values("car__id_car")
+    #         .annotate(
+    #             raskhod_za_period=Sum("raskhod_za_period"),
+    #             probeg_za_period=Sum("probeg_za_period"),
+    #             tekushchaya_nagruzka=Sum("tekushchaya_nagruzka"),
+    #             kolichestvo_reisov=Sum("kolichestvo_reisov"),
+    #             summarnii_ves_za_period=Sum("summarnii_ves_za_period"),
+    #             raskhod_privedennii_g_t_km_za_period=Sum(
+    #                 "raskhod_privedennii_g_t_km_za_period"
+    #             ),
+    #             # ostatok_na_tekushchii_moment=Subquery(last_ostatok_subquery),
+    #             sum_kolichestvo_poezdok_za_period=Sum("kolichestvo_poezdok_za_period"),
+    #             raskhod_za_poezdku=Sum("raskhod_za_poezdku"),
+    #             raskhod_na_khkh_za_period=Sum("raskhod_na_khkh_za_period"),
+    #             raskhod_pod_nagruzkoi_za_period=Sum("raskhod_pod_nagruzkoi_za_period"),
+    #             avg_kolichestvo_poezdok_za_period=Avg("kolichestvo_poezdok_za_period"),
+    #             min_ves_za_period=Min("min_ves_za_period"),
+    #             max_ves_za_period=Min("max_ves_za_period"),
+    #             avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
+    #         )
+    #     )
 
     if period == "30days":
-        start_date = today - timedelta(days=30)
+        start_time = (
+            datetime.combine(today, datetime.min.time())
+            - timedelta(days=30)
+        )
+        end_time = (
+            datetime.combine(today, datetime.min.time())
+            - timedelta(seconds=1)
+            )
         daily_data = (
-            DailyData.objects.filter(dt__date__range=[start_date, today])
+            DailyData.objects.filter(dt__date__range=[start_time, end_time])
             .values("car__id_car")
             .annotate(
                 raskhod_za_period=Sum("raskhod_za_period"),
@@ -395,6 +458,7 @@ def car_list(request):
                 avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
             )
         )
+        print(f"start_time {start_time} end_time {end_time}")
 
     # Пагинация
     paginator = Paginator(daily_data, 5)
@@ -402,8 +466,9 @@ def car_list(request):
     page_obj = paginator.get_page(page_number)
 
     # Дата для диаграммы
-    start_of_day = timezone.make_aware(datetime.combine(today, time.min))
-    time_since_start_of_day = timezone.now() - start_of_day
+
+    start_of_day = django_timezone.make_aware(datetime.combine(today, time.min))
+    time_since_start_of_day = django_timezone.now() - start_of_day
     hours, remainder = divmod(time_since_start_of_day.seconds, 3600)
     minutes, _ = divmod(remainder, 60)
     # time_since_start = f"{hours:02}:{minutes:02}"

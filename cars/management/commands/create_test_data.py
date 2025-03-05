@@ -1,5 +1,5 @@
-import random
-from datetime import datetime, time, timedelta
+# import random
+from datetime import datetime, time, timedelta, timezone
 
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
@@ -21,7 +21,11 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('Пользователь "test" создан.'))
 
         # Времена, в которые будут создаваться данные
-        times_of_day = [time(9, 0), time(14, 0), time(19, 0)]
+        times_of_day = [
+            time(9, 0).replace(tzinfo=timezone.utc),
+            time(16, 1).replace(tzinfo=timezone.utc),
+            time(1, 0).replace(tzinfo=timezone.utc)
+        ]
 
         # Создаем тестовые данные для машин
         for i in range(1, num_cars + 1):
@@ -34,7 +38,7 @@ class Command(BaseCommand):
             # Создаем данные за последние `num_days` дней
             for day in range(num_days):
                 # Получаем дату с 0:00
-                current_date = datetime.now().date() - timedelta(days=day)
+                current_date = datetime.utcnow().date() - timedelta(days=day)
 
                 # Создаем данные для каждого времени в течение дня
                 for time_of_day in times_of_day:
@@ -49,39 +53,33 @@ class Command(BaseCommand):
                         dt=target_datetime,
                         defaults={
                             # Топливо
-                            "ostatok_na_tekushchii_moment": random.uniform(1, 100),
-                            "raskhod_za_period": random.uniform(1, 100),
-                            "raskhod_za_poezdku": random.uniform(1, 100),
-                            "raskhod_na_khkh_za_period": random.uniform(1, 100),
-                            "raskhod_pod_nagruzkoi_za_period": random.uniform(1, 100),
-                            "raskhod_v_puti_za_period": random.uniform(1, 100),
-                            "raskhod_privedennii_g_t_km_za_period": random.uniform(
-                                1, 100
-                            ),
-                            "raskhod_privedennii_g_t_km_obshchii": random.uniform(
-                                1, 100
-                            ),
+                            "ostatok_na_tekushchii_moment": 10,
+                            "raskhod_za_period": 10,
+                            "raskhod_za_poezdku": 10,
+                            "raskhod_na_khkh_za_period": 10,
+                            "raskhod_pod_nagruzkoi_za_period": 10,
+                            "raskhod_v_puti_za_period": 10,
+                            "raskhod_privedennii_g_t_km_za_period": 10,
+                            "raskhod_privedennii_g_t_km_obshchii": 10,
                             # Датчик веса
-                            "tekushchaya_nagruzka": random.uniform(1, 100),
-                            "summarnii_ves_za_period": random.uniform(1, 100),
-                            "min_ves_za_period": random.uniform(1, 100),
-                            "max_ves_za_period": random.uniform(1, 100),
-                            "srednii_ves_reisa_za_period": random.uniform(1, 100),
+                            "tekushchaya_nagruzka": 10,
+                            "summarnii_ves_za_period": 10,
+                            "min_ves_za_period": 10,
+                            "max_ves_za_period": 10,
+                            "srednii_ves_reisa_za_period": 10,
                             # Пробег
-                            "probeg_na_segodnya": random.uniform(1, 100),
-                            "probeg_za_period": random.uniform(1, 100),
-                            "kolichestvo_reisov": random.uniform(1, 100),
-                            "kolichestvo_poezdok_za_period": random.uniform(1, 100),
+                            "probeg_na_segodnya": 10,
+                            "probeg_za_period": 10,
+                            "kolichestvo_reisov": 10,
+                            "kolichestvo_poezdok_za_period": 10,
                             # Время
-                            "vremya_s_nachala_perioda": random.uniform(1, 100),
-                            "vremya_raboty_dvigatelya_za_period": random.uniform(
-                                1, 100
-                            ),
-                            "vremya_hkh_za_period": random.uniform(1, 100),
-                            "motochasy_obshchie": random.uniform(1, 100),
-                            "motochasy_za_period": random.uniform(1, 100),
+                            "vremya_s_nachala_perioda": 10,
+                            "vremya_raboty_dvigatelya_za_period": 10,
+                            "vremya_hkh_za_period": 10,
+                            "motochasy_obshchie": 10,
+                            "motochasy_za_period": 10,
                             # Шины
-                            "davlenie_v_shinah": random.uniform(1, 100),
+                            "davlenie_v_shinah": 10,
                         },
                     )
 
