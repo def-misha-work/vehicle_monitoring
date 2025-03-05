@@ -1,0 +1,47 @@
+---
+services:
+
+  postgres:
+    container_name: postgres_container
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-passwd}
+      PGDATA: /data/postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+  
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    restart: unless-stopped
+
+  vehicle_monitoring:
+    image: vehicle_monitoring:latest
+    environment:
+      DOMEN: 127.0.0.1
+      KEY: ""
+      SECRET_KEY: ""
+      DEBUG: "True" 
+      POSTGRES_DB: "postgres" 
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "passwd"
+      DB_HOST: "postgres"
+      DB_PORT: 5432
+    build:
+      context: ./
+      dockerfile: dockerfile
+    ports:
+      - 8088:8080
+    hostname: vehicle_monitoring
+    container_name: vehicle_monitoring
+    depends_on:
+      - postgres
+

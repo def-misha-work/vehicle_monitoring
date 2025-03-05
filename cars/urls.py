@@ -1,10 +1,6 @@
 ﻿from django.urls import path
-from cars.views import (
-    car_list,
-    login_view,
-    logout_view,
-    settings,
-)
+
+from cars.views import car_list, login_view, logout_view, settings
 
 urlpatterns = [
     path("", car_list, name="car_list"),

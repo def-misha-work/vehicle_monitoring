@@ -1,22 +1,26 @@
 ﻿import random
-from django.utils import timezone
-from django.core.management.base import BaseCommand
-from cars.models import Cars, Toplivo, DatchikVesa, Probeg, Vremya, Shini
+
 from django.contrib.auth.models import User
+from django.core.management.base import BaseCommand
+from django.utils import timezone
+
+from cars.models import Cars, DatchikVesa, Probeg, Shini, Toplivo, Vremya
 
 
 class Command(BaseCommand):
-    help = 'Добавляет тестовые данные за вчерашний день для существующих машин пользователя'
+    help = "Добавляет тестовые данные за вчерашний день для существующих машин пользователя"
 
     def handle(self, *args, **kwargs):
         # Получаем тестового пользователя
-        user = User.objects.get(username='test')
+        user = User.objects.get(username="test")
 
         # Получаем все машины, связанные с тестовым пользователем
         cars = Cars.objects.filter(account_name=user)
 
         if not cars.exists():
-            self.stdout.write(self.style.WARNING('Нет машин, связанных с тестовым пользователем.'))
+            self.stdout.write(
+                self.style.WARNING("Нет машин, связанных с тестовым пользователем.")
+            )
             return
 
         # Определяем вчерашний день
@@ -28,13 +32,27 @@ class Command(BaseCommand):
         for car in cars:
             # Проверяем, есть ли уже данные за вчера
             if (
-                Toplivo.objects.filter(cars=car, dt__range=(start_of_day, end_of_day)).exists() or
-                DatchikVesa.objects.filter(cars=car, dt__range=(start_of_day, end_of_day)).exists() or
-                Probeg.objects.filter(cars=car, dt__range=(start_of_day, end_of_day)).exists() or
-                Vremya.objects.filter(cars=car, dt__range=(start_of_day, end_of_day)).exists() or
-                Shini.objects.filter(cars=car, dt__range=(start_of_day, end_of_day)).exists()
+                Toplivo.objects.filter(
+                    cars=car, dt__range=(start_of_day, end_of_day)
+                ).exists()
+                or DatchikVesa.objects.filter(
+                    cars=car, dt__range=(start_of_day, end_of_day)
+                ).exists()
+                or Probeg.objects.filter(
+                    cars=car, dt__range=(start_of_day, end_of_day)
+                ).exists()
+                or Vremya.objects.filter(
+                    cars=car, dt__range=(start_of_day, end_of_day)
+                ).exists()
+                or Shini.objects.filter(
+                    cars=car, dt__range=(start_of_day, end_of_day)
+                ).exists()
             ):
-                self.stdout.write(self.style.WARNING(f'Данные за вчера уже существуют для машины {car.id_car}.'))
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Данные за вчера уже существуют для машины {car.id_car}."
+                    )
+                )
                 continue
 
             # Создаем данные для Toplivo
@@ -93,6 +111,12 @@ class Command(BaseCommand):
             # Сохраняем изменения в машине
             car.save()
 
-            self.stdout.write(self.style.SUCCESS(f'Данные за вчера добавлены для машины {car.id_car}.'))
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Данные за вчера добавлены для машины {car.id_car}."
+                )
+            )
 
-        self.stdout.write(self.style.SUCCESS('Данные за вчера успешно добавлены для всех машин.'))
+        self.stdout.write(
+            self.style.SUCCESS("Данные за вчера успешно добавлены для всех машин.")
+        )
