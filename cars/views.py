@@ -270,6 +270,7 @@ def car_list(request):
             "get_params": get_params.urlencode(),
             "plan": plan,
             "time_now": time_now,
+            # TODO разобратся почему смена всегда ALL
             "select_shift": select_shift.select_smena
         },
     )
