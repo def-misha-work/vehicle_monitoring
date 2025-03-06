@@ -2,7 +2,7 @@
   <!--Это окно текстового поиска, пока не нужно.-->
   <!-- <input class="search-bar" placeholder="Search..." type="text"> -->
   <div class="mode-switch now_date_in_fiter">
-    Период: {{ period }}
+    Период: {{ period }}, Смена: {{ shift }}
   </div>
   <div class="app-content-actions-wrapper">
     <div class="filter-button-wrapper">
@@ -11,16 +11,16 @@
     
     <div class="today-buttons-wrapper" style="display: flex; gap: 8px;">
       <select onchange="location = this.value;" class="smena_select">
-        <option value="{% url 'car_list' %}?period=today" 
+        <option value="{% url 'car_list' %}?period=today"
                 {% if period == "today" %}selected{% endif %}>Сутки</option>
-        <option value="{% url 'car_list' %}?period=smena_one" 
-                {% if period == "smena_one" %}selected{% endif %}>Смена 1</option>
-        <option value="{% url 'car_list' %}?period=smena_two" 
-                {% if period == "smena_two" %}selected{% endif %}>Смена 2</option>
-        <option value="{% url 'car_list' %}?period=smena_three" 
-                {% if period == "smena_three" %}selected{% endif %}>Смена 3</option>
-        <option value="{% url 'car_list' %}?period=smena_sum" 
-                {% if period == "smena_sum" %}selected{% endif %}>Смены суммарно</option>
+        <option value="{% url 'car_list' %}?shift=smena_one" 
+                {% if shift == "smena_one" %}selected{% endif %}>Смена 1</option>
+        <option value="{% url 'car_list' %}?shift=smena_two" 
+                {% if shift == "smena_two" %}selected{% endif %}>Смена 2</option>
+        <option value="{% url 'car_list' %}?shift=smena_three" 
+                {% if shift == "smena_three" %}selected{% endif %}>Смена 3</option>
+        <option value="{% url 'car_list' %}?shift=smena_sum" 
+                {% if shift == "smena_sum" %}selected{% endif %}>Смены суммарно</option>
     </select>
       <!-- <a href="{% url 'car_list' %}?period=smena" class="action-button">Смена</a> -->
       <a href="{% url 'car_list' %}?period=today" class="action-button">Сегодня</a>

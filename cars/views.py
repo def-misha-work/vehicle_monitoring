@@ -140,6 +140,7 @@ def car_list(request):
 
     # По умолчанию фильтруем за сегодня
     period = request.GET.get("period", "today")
+    shift = request.GET.get("shift", "all")
     today = datetime.utcnow()
 
     # Подзапрос для получения последнего значения ostatok_na_tekushchii_moment
@@ -228,12 +229,12 @@ def car_list(request):
     #         )
     #     )
 
-    if period == "smena_one" or period == "smena_two" or period == "smena_three":
-        if period == "smena_one":
+    if shift == "smena_one" or shift == "smena_two" or shift == "smena_three":
+        if shift == "smena_one":
             smena, created = SmenaOne.objects.get_or_create(account_name=user)
-        if period == "smena_two":
+        if shift == "smena_two":
             smena, created = SmenaTwo.objects.get_or_create(account_name=user)
-        if period == "smena_three":
+        if shift == "smena_three":
             smena, created = SmenaThree.objects.get_or_create(account_name=user)
         start_time = (
             datetime.combine(today, datetime.min.time())
@@ -253,7 +254,7 @@ def car_list(request):
             )
         start_time = start_time.replace(tzinfo=timezone.utc)
         end_time = end_time.replace(tzinfo=timezone.utc)
-        print(f"start_time {start_time}, end_time {end_time}")
+        # print(f"start_time {start_time}, end_time {end_time}")
         daily_data = (
             DailyData.objects.filter(dt__range=[start_time, end_time])
             .values("car__id_car")
@@ -285,9 +286,9 @@ def car_list(request):
                 ),
             )
         )
-        print("sql: ", str(daily_data.query))
+        # print("sql: ", str(daily_data.query))
 
-    if period == "today" or "smena_sum":
+    if period == "today" or shift == "smena_sum":
         daily_data = (
             DailyData.objects.filter(dt__date=today)
             .values("car__id_car")
@@ -398,7 +399,7 @@ def car_list(request):
                 avg_srednii_ves_reisa_za_period=Avg("srednii_ves_reisa_za_period"),
             )
         )
-        print(f"start_time {start_time} end_time {end_time}")
+        # print(f"start_time {start_time} end_time {end_time}")
 
     # if period == "7days":
     #     start_date = today - timedelta(days=7)
@@ -467,10 +468,10 @@ def car_list(request):
 
     # Дата для диаграммы
 
-    start_of_day = django_timezone.make_aware(datetime.combine(today, time.min))
-    time_since_start_of_day = django_timezone.now() - start_of_day
-    hours, remainder = divmod(time_since_start_of_day.seconds, 3600)
-    minutes, _ = divmod(remainder, 60)
+    # start_of_day = django_timezone.make_aware(datetime.combine(today, time.min))
+    # time_since_start_of_day = django_timezone.now() - start_of_day
+    # hours, remainder = divmod(time_since_start_of_day.seconds, 3600)
+    # minutes, _ = divmod(remainder, 60)
     # time_since_start = f"{hours:02}:{minutes:02}"
 
     # Передаем параметры GET-запроса в контекст
@@ -486,7 +487,7 @@ def car_list(request):
             "page_obj": page_obj,
             "user": user,
             "period": period,
-            # "time_since_start": time_since_start,
+            "shift": shift,
             "get_params": get_params.urlencode(),
             "plan": plan,
         },
