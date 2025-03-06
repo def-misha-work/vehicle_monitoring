@@ -77,6 +77,17 @@ class SmenaThree(models.Model):
         verbose_name_plural = "Смены"
 
 
+class SmenaAll(models.Model):
+    account_name = models.OneToOneField(
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    start = models.IntegerField(verbose_name="Начало смены (часы)", default=0)
+    end = models.IntegerField(verbose_name="Окончание смены (часы)", default=24)
+
+    def __str__(self):
+        return f"Смена с {self.start}:00 по {self.end}:00"
+
+
 class Cars(models.Model):
     id_car = models.CharField(
         max_length=255,
@@ -281,3 +292,23 @@ class WorkShift(models.Model):
 
     def __str__(self):
         return f"Информация о смене: {self.id} - {self.work_shift_name} - daily_data_id: {self.daily_data.id}"
+
+
+class SelectShift(models.Model):
+    SELECT_SHIFT = [
+        ("smena_one", "smena_one"),
+        ("smena_two", "smena_two"),
+        ("smena_three", "smena_three"),
+        ("all", "all"),
+    ]
+    account_name = models.OneToOneField(
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    select_smena = models.CharField(
+        max_length=20,
+        verbose_name="Выбранная смена",
+        choices=SELECT_SHIFT,
+        default="all")
+
+    def __str__(self):
+        return f"Выбранная смена {self.select_smena}"

@@ -11,22 +11,22 @@
     
     <div class="today-buttons-wrapper" style="display: flex; gap: 8px;">
       <select onchange="location = this.value;" class="smena_select">
-        <option value="{% url 'car_list' %}?period=today"
+        <option value="{% url 'car_list' %}?period={{ period }}"
             {% if period == "today" %}selected{% endif %}>Сутки</option>
-        <option value="{% url 'car_list' %}?shift=smena_one" 
+        <option value="{% url 'car_list' %}?period={{ period }}&shift=smena_one" 
             {% if shift == "smena_one" %}selected{% endif %}>Смена 1</option>
-        <option value="{% url 'car_list' %}?shift=smena_two" 
+        <option value="{% url 'car_list' %}?period={{ period }}&shift=smena_two" 
             {% if shift == "smena_two" %}selected{% endif %}>Смена 2</option>
-        <option value="{% url 'car_list' %}?shift=smena_three" 
+        <option value="{% url 'car_list' %}?period={{ period }}&shift=smena_three" 
             {% if shift == "smena_three" %}selected{% endif %}>Смена 3</option>
-        <option value="{% url 'car_list' %}?shift=smena_sum" 
+        <option value="{% url 'car_list' %}?period={{ period }}&shift=smena_sum" 
             {% if shift == "smena_sum" %}selected{% endif %}>Смены суммарно</option>
       </select>
       <!-- <a href="{% url 'car_list' %}?period=smena" class="action-button">Смена</a> -->
-      <a href="{% url 'car_list' %}?period=today" class="action-button">Сегодня</a>
-      <a href="{% url 'car_list' %}?period=yesterday" class="action-button">Вчера</a>
-      <a href="{% url 'car_list' %}?period=7days" class="action-button">7 дней</a>
-      <a href="{% url 'car_list' %}?period=30days" class="action-button">30 дней</a>
+      <a href="{% url 'car_list' %}?period=today&shift={{ select_shift }}" class="action-button">Сегодня</a>
+      <a href="{% url 'car_list' %}?period=yesterday&shift={{ select_shift }}" class="action-button">Вчера</a>
+      <a href="{% url 'car_list' %}?period=7days&shift={{ select_shift }}" class="action-button">7 дней</a>
+      <a href="{% url 'car_list' %}?period=30days&shift={{ select_shift }}" class="action-button">30 дней</a>
       
     </div>
     <button class="action-button list active" title="List View">
