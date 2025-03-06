@@ -15,7 +15,7 @@
     </div>
     <div class="chart_nums">
       {% if period == 'today'%}
-        <div class="time-since-start"></div>
+        <div class="time-since-start">{{ time_now }}</div>
       {% endif %}
       {% if period == 'today' or period == 'yesterday' %}
       <div class="chart_nums_red">{{ obj.chart_data_tekushchaya_nagruzka|floatformat:"0" }}</div>

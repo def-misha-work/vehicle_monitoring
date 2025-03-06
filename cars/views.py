@@ -470,13 +470,8 @@ def car_list(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    # Дата для диаграммы
-
-    # start_of_day = django_timezone.make_aware(datetime.combine(today, time.min))
-    # time_since_start_of_day = django_timezone.now() - start_of_day
-    # hours, remainder = divmod(time_since_start_of_day.seconds, 3600)
-    # minutes, _ = divmod(remainder, 60)
-    # time_since_start = f"{hours:02}:{minutes:02}"
+    # Время для диаграммы
+    time_now = today.strftime("%H:%M:%S")
 
     # Передаем параметры GET-запроса в контекст
     get_params = request.GET.copy()
@@ -494,6 +489,7 @@ def car_list(request):
             "shift": shift,
             "get_params": get_params.urlencode(),
             "plan": plan,
+            "time_now": time_now
         },
     )
 
