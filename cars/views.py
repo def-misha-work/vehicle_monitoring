@@ -254,7 +254,7 @@ def car_list(request):
             )
         start_time = start_time.replace(tzinfo=timezone.utc)
         end_time = end_time.replace(tzinfo=timezone.utc)
-        # print(f"start_time {start_time}, end_time {end_time}")
+        print(f"start_time {start_time}, end_time {end_time}")
         daily_data = (
             DailyData.objects.filter(dt__range=[start_time, end_time])
             .values("car__id_car")
@@ -288,7 +288,8 @@ def car_list(request):
         )
         # print("sql: ", str(daily_data.query))
 
-    if period == "today" or shift == "smena_sum":
+    if period == "today" and shift == "all" or shift == "smena_sum":
+        print(f"today {today}")
         daily_data = (
             DailyData.objects.filter(dt__date=today)
             .values("car__id_car")
@@ -331,6 +332,7 @@ def car_list(request):
             datetime.combine(today, datetime.min.time())
             - timedelta(seconds=1)
             )
+        print(f"start_time {start_time}, end_time {end_time}")
         daily_data = (
             DailyData.objects.filter(dt__date__range=[start_time, end_time])
             .values("car__id_car")
@@ -373,6 +375,7 @@ def car_list(request):
             datetime.combine(today, datetime.min.time())
             - timedelta(seconds=1)
             )
+        print(f"start_time {start_time}, end_time {end_time}")
         daily_data = (
             DailyData.objects.filter(
                 dt__date__range=[start_time, end_time],
@@ -436,6 +439,7 @@ def car_list(request):
             datetime.combine(today, datetime.min.time())
             - timedelta(seconds=1)
             )
+        print(f"start_time {start_time}, end_time {end_time}")
         daily_data = (
             DailyData.objects.filter(dt__date__range=[start_time, end_time])
             .values("car__id_car")
