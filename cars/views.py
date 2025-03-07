@@ -177,15 +177,24 @@ def car_list(request):
     select_shift = SelectShift.objects.filter(account_name=user).first()
     if not select_shift:
         select_shift = SelectShift.objects.create(account_name=user, select_smena=shift).first()
+        select_shift.save()
     # Выбираем смену
     if shift == "all" or shift == "smena_sum":
         smena, created = SmenaAll.objects.get_or_create(account_name=user)
+        select_shift.select_smena = "all"
+        select_shift.save()
     if shift == "smena_one":
         smena, created = SmenaOne.objects.get_or_create(account_name=user)
+        select_shift.select_smena = "smena_one"
+        select_shift.save()
     if shift == "smena_two":
         smena, created = SmenaTwo.objects.get_or_create(account_name=user)
+        select_shift.select_smena = "smena_two"
+        select_shift.save()
     if shift == "smena_three":
         smena, created = SmenaThree.objects.get_or_create(account_name=user)
+        select_shift.select_smena = "smena_three"
+        select_shift.save()
     shift_start_time = (
             datetime.combine(today, datetime.min.time())
             + timedelta(hours=smena.start)
