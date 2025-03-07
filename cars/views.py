@@ -176,7 +176,7 @@ def car_list(request):
     # Получаем или создаем выбранную смену
     select_shift = SelectShift.objects.filter(account_name=user).first()
     if not select_shift:
-        select_shift = SelectShift.objects.create(account_name=user, select_smena=shift).first()
+        select_shift = SelectShift.objects.create(account_name=user, select_smena=shift)
         select_shift.save()
     # Выбираем смену
     if shift == "all" or shift == "smena_sum":
